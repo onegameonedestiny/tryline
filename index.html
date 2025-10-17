@@ -6,13 +6,15 @@
   <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
   <meta name="generator" content="Scirra Construct">
 
+  <!-- Construct 基本設定 -->
   <link rel="manifest" href="appmanifest.json">
   <link rel="apple-touch-icon" sizes="128x128" href="icons/icon-128.png">
   <link rel="apple-touch-icon" sizes="256x256" href="icons/icon-256.png">
   <link rel="apple-touch-icon" sizes="512x512" href="icons/icon-512.png">
   <link rel="icon" type="image/png" href="icons/icon-512.png">
-
   <link rel="stylesheet" href="style.css">
+
+  <!-- LIFF SDK -->
   <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
 </head>
 
@@ -22,13 +24,14 @@
 
   <script>
   async function initLiff() {
-    const LIFF_ID = "2008129352-Ml3XP4xL"; // ← 換成你的 LIFF ID
+    const LIFF_ID = "2008129352-Ml3XP4xL"; // ← 改成你的 LIFF ID
+
     try {
       console.log("[DEBUG] 初始化 LIFF...");
       await liff.init({ liffId: LIFF_ID });
       console.log("[DEBUG] liff.init 完成");
 
-      // 如果不是在 LINE APP 裡
+      // 檢查是否在 LINE App 內
       if (!liff.isInClient()) {
         document.body.innerHTML = `
           <h2>⚠️ 請從 LINE App 開啟此遊戲</h2>
@@ -37,16 +40,16 @@
         return;
       }
 
-      // 尚未登入
+      // 若未登入，導向登入
       if (!liff.isLoggedIn()) {
         console.log("[DEBUG] 未登入，導向登入中...");
         liff.login({ redirectUri: location.href });
         return;
       }
 
-      // 已登入
+      // 取得使用者資料
       const profile = await liff.getProfile();
-      console.log("[DEBUG] profile =", profile);
+      console.log("[DEBUG] 取得 profile =", profile);
 
       // 寫入 localStorage
       localStorage.setItem("userId", profile.userId || "");
@@ -54,5 +57,69 @@
       localStorage.setItem("pictureUrl", profile.pictureUrl || "");
       localStorage.setItem("statusMessage", profile.statusMessage || "");
 
-      // 在畫面上顯示確認
-      document.body
+      console.log("[DEBUG] LocalStorage 已設定：", {
+        userId: localStorage.getItem("userId"),
+        displayName: localStorage.getItem("displayName")
+      });
+
+      // 顯示確認畫面
+      document.body.innerHTML = `
+        <h2>✅ LIFF 登入成功</h2>
+        <p><b>ID:</b> ${profile.userId}</p>
+        <p><b>名稱:</b> ${profile.displayName}</p>
+        <p><b>狀態:</b> ${profile.statusMessage || "(無)"}</p>
+        <img src="${profile.pictureUrl}" width="80" style="border-radius:50%;"><br>
+        <p>2 秒後啟動 Construct 3...</p>
+      `;
+
+      // 延遲兩秒後啟動遊戲
+      setTimeout(startConstruct3, 2000);
+
+    } catch (err) {
+      console.error("[ERROR] LIFF 初始化失敗:", err);
+      document.body.innerHTML = `
+        <h2>❌ LIFF 初始化失敗</h2>
+        <p>${err}</p>`;
+    }
+  }
+
+  // Construct 3 啟動流程
+  function startConstruct3() {
+    console.log("[DEBUG] startConstruct3()");
+    document.body.innerHTML = "<h2>🎮 啟動遊戲中...</h2>";
+
+    const loadScript = (src, type = "module") => {
+      return new Promise((resolve, reject) => {
+        const s = document.createElement("script");
+        s.src = src;
+        s.type = type;
+        s.onload = () => {
+          console.log(`[DEBUG] 已載入 ${src}`);
+          resolve();
+        };
+        s.onerror = reject;
+        document.body.appendChild(s);
+      });
+    };
+
+    (async () => {
+      try {
+        await loadScript("scripts/modernjscheck.js");
+        await loadScript("scripts/supportcheck.js");
+        await loadScript("scripts/offlineclient.js");
+        await loadScript("scripts/main.js");  // ← Construct 3 主程式
+        await loadScript("scripts/register-sw.js");
+        console.log("[DEBUG] Construct 3 全部載入完成 ✅");
+      } catch (err) {
+        console.error("[ERROR] Construct 3 載入失敗:", err);
+        document.body.innerHTML = `
+          <h2>❌ Construct 3 載入失敗</h2>
+          <p>${err}</p>`;
+      }
+    })();
+  }
+
+  window.addEventListener("load", initLiff);
+  </script>
+</body>
+</html>
