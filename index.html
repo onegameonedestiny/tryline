@@ -1,49 +1,102 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <meta charset="UTF-8">
-	<title>555</title>
-	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no">
-	
-	<!-- Made with Construct, the game and app creator :: https://www.construct.net -->
-	<meta name="generator" content="Scirra Construct">
+  <meta charset="UTF-8">
+  <title>555</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no">
+  <meta name="generator" content="Scirra Construct">
 
+  <link rel="manifest" href="appmanifest.json">
+  <link rel="apple-touch-icon" sizes="128x128" href="icons/icon-128.png">
+  <link rel="apple-touch-icon" sizes="256x256" href="icons/icon-256.png">
+  <link rel="apple-touch-icon" sizes="512x512" href="icons/icon-512.png">
+  <link rel="icon" type="image/png" href="icons/icon-512.png">
 
+  <link rel="stylesheet" href="style.css">
 
-	<link rel="manifest" href="appmanifest.json">
-	<link rel="apple-touch-icon" sizes="128x128" href="icons/icon-128.png">
-	<link rel="apple-touch-icon" sizes="256x256" href="icons/icon-256.png">
-	<link rel="apple-touch-icon" sizes="512x512" href="icons/icon-512.png">
-	<link rel="icon" type="image/png" href="icons/icon-512.png">
+  <!-- LINE LIFF SDK -->
+  <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+  <script>
+  async function initLiffAndStartGame() {
+    const LIFF_ID = "2008129352-Ml3XP4xL";  // ← 替換成你的 LIFF ID
 
-	<link rel="stylesheet" href="style.css">
+    try {
+      await liff.init({ liffId: LIFF_ID });
+      console.log("[DEBUG] liff.init done, isInClient:", liff.isInClient(), "isLoggedIn:", liff.isLoggedIn());
 
+      // 如果不是在 LINE App 裡
+      if (!liff.isInClient()) {
+        document.body.innerHTML = `
+          <div style="display:flex;align-items:center;justify-content:center;height:100vh;text-align:center;font-family:sans-serif;padding:2em;">
+            <div>
+              <h2>⚠️ 請從 LINE App 開啟此遊戲</h2>
+              <p>目前偵測到您在外部瀏覽器中開啟，請回到 LINE 聊天室點入連結。</p>
+            </div>
+          </div>`;
+        console.warn("[DEBUG] Not inside LINE client. Stopping here.");
+        return;
+      }
 
+      // 在 LINE App 裡面，但還沒登入
+      if (!liff.isLoggedIn()) {
+        console.log("[DEBUG] Not logged in, calling login...");
+        liff.login({ redirectUri: location.href });
+        return;
+      }
 
-</head> 
- 
+      // 已登入，可取得資料
+      const profile = await liff.getProfile();
+      console.log("[DEBUG] LIFF profile:", profile);
+
+      localStorage.setItem("userId", profile.userId || "");
+      localStorage.setItem("displayName", profile.displayName || "");
+      localStorage.setItem("pictureUrl", profile.pictureUrl || "");
+      localStorage.setItem("statusMessage", profile.statusMessage || "");
+
+      console.log("[DEBUG] LocalStorage after set:", {
+        userId: localStorage.getItem("userId"),
+        displayName: localStorage.getItem("displayName")
+      });
+
+      // 資料都已寫入後，才啟動 Construct 3 遊戲
+      startConstruct3();
+
+    } catch (err) {
+      console.error("[ERROR] initLiffAndStartGame error:", err);
+      document.body.innerHTML = `
+        <div style="display:flex;align-items:center;justify-content:center;height:100vh;text-align:center;font-family:sans-serif;padding:2em;">
+          <div>
+            <h2>❌ LIFF 初始化失敗</h2>
+            <p>請確認你的網路或 LINE 登入狀態。</p>
+          </div>
+        </div>`;
+    }
+  }
+
+  function startConstruct3() {
+    console.log("[DEBUG] startConstruct3()");
+    const script = document.createElement("script");
+    script.type = "module";
+    script.src = "scripts/main.js";
+    document.body.appendChild(script);
+  }
+
+  window.addEventListener("load", initLiffAndStartGame);
+  </script>
+</head>
+
 <body>
+  <noscript>
+    <div id="notSupportedWrap">
+      <h2 id="notSupportedTitle">This content requires JavaScript</h2>
+      <p class="notSupportedMessage">JavaScript appears to be disabled. Please enable it to view this content.</p>
+    </div>
+  </noscript>
 
-	
-
-<script>
-if (location.protocol.substr(0, 4) === "file")
-{
-	alert("Web exports won't work until you upload them. (When running on the file: protocol, browsers block many features from working for security reasons.)");
-}
-</script>
-	
-	<noscript>
-		<div id="notSupportedWrap">
-			<h2 id="notSupportedTitle">This content requires JavaScript</h2>
-			<p class="notSupportedMessage">JavaScript appears to be disabled. Please enable it to view this content.</p>
-		</div>
-	</noscript>
-	<script src="scripts/modernjscheck.js"></script>
-	<script src="scripts/supportcheck.js"></script>
-	<script src="scripts/offlineclient.js" type="module"></script>
-	<script src="scripts/main.js" type="module"></script>
-	<script src="scripts/register-sw.js" type="module"></script>
-
-</body> 
+  <script src="scripts/modernjscheck.js"></script>
+  <script src="scripts/supportcheck.js"></script>
+  <script src="scripts/offlineclient.js" type="module"></script>
+  <script src="scripts/register-sw.js" type="module"></script>
+  <!-- 注意：這裡不要直接載入 main.js -->
+</body>
 </html>
