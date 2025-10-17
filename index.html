@@ -2,11 +2,10 @@
 <html>
 <head>
   <meta charset="UTF-8">
-  <title>LIFF + C3 安全啟動</title>
+  <title>LIFF + Construct3 完整安全啟動</title>
   <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
   <meta name="generator" content="Scirra Construct">
 
-  <!-- Construct 基本設定 -->
   <link rel="manifest" href="appmanifest.json">
   <link rel="apple-touch-icon" sizes="128x128" href="icons/icon-128.png">
   <link rel="apple-touch-icon" sizes="256x256" href="icons/icon-256.png">
@@ -14,7 +13,6 @@
   <link rel="icon" type="image/png" href="icons/icon-512.png">
   <link rel="stylesheet" href="style.css">
 
-  <!-- LIFF SDK -->
   <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
 </head>
 
@@ -24,50 +22,40 @@
 
   <script>
   async function initLiff() {
-    const LIFF_ID = "2008129352-Ml3XP4xL"; // ← 改成你的 LIFF ID
-
+    const LIFF_ID = "2008129352-Ml3XP4xL"; // 換成你的 LIFF ID
     try {
       console.log("[DEBUG] 初始化 LIFF...");
       await liff.init({ liffId: LIFF_ID });
       console.log("[DEBUG] liff.init 完成");
 
-      // 檢查是否在 LINE App 內
+      // 非 LINE App：中斷
       if (!liff.isInClient()) {
         document.body.innerHTML = `
           <h2>⚠️ 請從 LINE App 開啟此遊戲</h2>
           <p>目前偵測到您在外部瀏覽器中開啟，請回到 LINE 聊天室點入連結。</p>`;
-        console.warn("[DEBUG] Not inside LINE client.");
         return;
       }
 
-      // 若未登入，導向登入
+      // 未登入
       if (!liff.isLoggedIn()) {
-        console.log("[DEBUG] 未登入，導向登入中...");
         liff.login({ redirectUri: location.href });
         return;
       }
 
       // 取得使用者資料
       const profile = await liff.getProfile();
-      console.log("[DEBUG] 取得 profile =", profile);
+      console.log("[DEBUG] profile =", profile);
 
-      // 寫入 localStorage
       localStorage.setItem("userId", profile.userId || "");
       localStorage.setItem("displayName", profile.displayName || "(未提供名稱)");
       localStorage.setItem("pictureUrl", profile.pictureUrl || "");
       localStorage.setItem("statusMessage", profile.statusMessage || "");
-
-      console.log("[DEBUG] LocalStorage 已設定：", {
-        userId: localStorage.getItem("userId"),
-        displayName: localStorage.getItem("displayName")
-      });
 
       // 顯示確認畫面
       document.body.innerHTML = `
         <h2>✅ LIFF 登入成功</h2>
         <p><b>ID:</b> ${profile.userId}</p>
         <p><b>名稱:</b> ${profile.displayName}</p>
-        <p><b>狀態:</b> ${profile.statusMessage || "(無)"}</p>
         <img src="${profile.pictureUrl}" width="80" style="border-radius:50%;"><br>
         <p>2 秒後啟動 Construct 3...</p>
       `;
@@ -83,40 +71,18 @@
     }
   }
 
-  // Construct 3 啟動流程
+  // ✅ Construct 3 僅在這裡手動啟動
   function startConstruct3() {
     console.log("[DEBUG] startConstruct3()");
     document.body.innerHTML = "<h2>🎮 啟動遊戲中...</h2>";
 
-    const loadScript = (src, type = "module") => {
-      return new Promise((resolve, reject) => {
-        const s = document.createElement("script");
-        s.src = src;
-        s.type = type;
-        s.onload = () => {
-          console.log(`[DEBUG] 已載入 ${src}`);
-          resolve();
-        };
-        s.onerror = reject;
-        document.body.appendChild(s);
-      });
-    };
-
-    (async () => {
-      try {
-        await loadScript("scripts/modernjscheck.js");
-        await loadScript("scripts/supportcheck.js");
-        await loadScript("scripts/offlineclient.js");
-        await loadScript("scripts/main.js");  // ← Construct 3 主程式
-        await loadScript("scripts/register-sw.js");
-        console.log("[DEBUG] Construct 3 全部載入完成 ✅");
-      } catch (err) {
-        console.error("[ERROR] Construct 3 載入失敗:", err);
-        document.body.innerHTML = `
-          <h2>❌ Construct 3 載入失敗</h2>
-          <p>${err}</p>`;
-      }
-    })();
+    // 僅載入 main.js，不載 offlineclient/register-sw
+    const s = document.createElement("script");
+    s.type = "module";
+    s.src = "scripts/main.js";
+    s.onload = () => console.log("[DEBUG] main.js 已載入");
+    s.onerror = e => console.error("[ERROR] main.js 載入失敗", e);
+    document.body.appendChild(s);
   }
 
   window.addEventListener("load", initLiff);
