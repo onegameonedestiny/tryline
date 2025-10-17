@@ -1212,6 +1212,7 @@ function or(l, r)
 }
 
 self.C3_ExpressionFuncs = [
+		() => 2,
 		() => "displayName",
 		p => {
 			const f0 = p._GetNode(0).GetBoundMethod();

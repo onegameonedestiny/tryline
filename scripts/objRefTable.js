@@ -5,6 +5,7 @@ self.C3_GetObjectRefTable = function () {
 		C3.Plugins.Text,
 		C3.Plugins.LocalStorage,
 		C3.Plugins.System.Cnds.OnLayoutStart,
+		C3.Plugins.System.Acts.Wait,
 		C3.Plugins.LocalStorage.Acts.GetItem,
 		C3.Plugins.LocalStorage.Cnds.OnItemGet,
 		C3.Plugins.Text.Acts.SetText,

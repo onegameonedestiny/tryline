@@ -4,7 +4,11 @@
     <meta charset="UTF-8">
 	<title>555</title>
 	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no">
+	
+	<!-- Made with Construct, the game and app creator :: https://www.construct.net -->
 	<meta name="generator" content="Scirra Construct">
+
+
 
 	<link rel="manifest" href="appmanifest.json">
 	<link rel="apple-touch-icon" sizes="128x128" href="icons/icon-128.png">
@@ -14,64 +18,32 @@
 
 	<link rel="stylesheet" href="style.css">
 
-	<!-- ✅ LINE LIFF 初始化 -->
-	<script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
-	<script>
-	async function initLiffAndStartGame() {
-	  const LIFF_ID = "2008129352-Ml3XP4xL"; // ← 你的 LIFF ID
-	  try {
-	    await liff.init({ liffId: LIFF_ID });
 
-	    if (!liff.isLoggedIn()) {
-	      liff.login({ redirectUri: location.href });
-	      return;
-	    }
 
-	    const profile = await liff.getProfile();
-	    console.log("✅ LIFF 初始化成功:", profile);
-
-	    // 寫入 localStorage 給 Construct 3 使用
-	    localStorage.setItem("userId", profile.userId || "");
-	    localStorage.setItem("displayName", profile.displayName || "(未提供名稱)");
-	    localStorage.setItem("pictureUrl", profile.pictureUrl || "");
-	    localStorage.setItem("statusMessage", profile.statusMessage || "");
-
-	    // 🟢 確定寫入完成後再啟動 Construct 3
-	    startConstruct3();
-
-	  } catch (err) {
-	    console.error("❌ LIFF 初始化錯誤:", err);
-	    alert("無法初始化 LIFF，請重新開啟 LINE 再試一次。");
-	  }
-	}
-
-	function startConstruct3() {
-	  console.log("🚀 啟動 Construct 3 遊戲...");
-	  // 動態載入 Construct 3 的主程式
-	  const script = document.createElement("script");
-	  script.type = "module";
-	  script.src = "scripts/main.js";
-	  document.body.appendChild(script);
-	}
-
-	// 等網頁載入完成再開始初始化
-	window.addEventListener("load", initLiffAndStartGame);
-	</script>
-</head>
-
+</head> 
+ 
 <body>
+
+	
+
+<script>
+if (location.protocol.substr(0, 4) === "file")
+{
+	alert("Web exports won't work until you upload them. (When running on the file: protocol, browsers block many features from working for security reasons.)");
+}
+</script>
+	
 	<noscript>
 		<div id="notSupportedWrap">
 			<h2 id="notSupportedTitle">This content requires JavaScript</h2>
 			<p class="notSupportedMessage">JavaScript appears to be disabled. Please enable it to view this content.</p>
 		</div>
 	</noscript>
-
-	<!-- ✅ 不要在這裡載入 main.js，改由上方 script 控制 -->
 	<script src="scripts/modernjscheck.js"></script>
 	<script src="scripts/supportcheck.js"></script>
 	<script src="scripts/offlineclient.js" type="module"></script>
-	<!-- ❌ <script src="scripts/main.js" type="module"></script> -->
+	<script src="scripts/main.js" type="module"></script>
 	<script src="scripts/register-sw.js" type="module"></script>
-</body>
+
+</body> 
 </html>
