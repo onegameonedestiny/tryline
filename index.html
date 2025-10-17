@@ -1,49 +1,82 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <meta charset="UTF-8">
-	<title>555</title>
-	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no">
-	
-	<!-- Made with Construct, the game and app creator :: https://www.construct.net -->
-	<meta name="generator" content="Scirra Construct">
+  <meta charset="UTF-8">
+  <title>水行者 / LIFF 測試</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="generator" content="Scirra Construct">
 
+  <!-- Construct 3 必要檔案 -->
+  <link rel="manifest" href="appmanifest.json">
+  <link rel="apple-touch-icon" sizes="128x128" href="icons/icon-128.png">
+  <link rel="apple-touch-icon" sizes="256x256" href="icons/icon-256.png">
+  <link rel="apple-touch-icon" sizes="512x512" href="icons/icon-512.png">
+  <link rel="icon" type="image/png" href="icons/icon-512.png">
+  <link rel="stylesheet" href="style.css">
 
+  <!-- LINE LIFF SDK -->
+  <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
 
-	<link rel="manifest" href="appmanifest.json">
-	<link rel="apple-touch-icon" sizes="128x128" href="icons/icon-128.png">
-	<link rel="apple-touch-icon" sizes="256x256" href="icons/icon-256.png">
-	<link rel="apple-touch-icon" sizes="512x512" href="icons/icon-512.png">
-	<link rel="icon" type="image/png" href="icons/icon-512.png">
+  <script>
+  const LIFF_ID = "2008129352-Ml3XP4xL"; // ← 你的 LIFF ID
 
-	<link rel="stylesheet" href="style.css">
+  async function initLiff() {
+    try {
+      await liff.init({ liffId: LIFF_ID });
+      console.log("[DEBUG] LIFF 初始化完成");
 
+      // 檢查是否在 LINE APP 內
+      if (!liff.isInClient()) {
+        document.body.innerHTML = `
+          <div style="display:flex;flex-direction:column;justify-content:center;align-items:center;height:100vh;font-family:sans-serif;text-align:center;">
+            <h2>⚠️ 請從 LINE APP 開啟此遊戲</h2>
+            <p>目前偵測到您在外部瀏覽器中開啟。<br>請回到 LINE 聊天室點入連結。</p>
+          </div>`;
+        console.warn("[DEBUG] 不在 LINE 內，已阻擋 Construct 啟動");
+        return;
+      }
 
+      // ✅ 在 LINE 內正常啟動 Construct 3
+      console.log("[DEBUG] 在 LINE APP 內，開始載入 Construct 遊戲");
+      startConstruct3();
 
-</head> 
- 
+    } catch (e) {
+      console.error("[ERROR] LIFF 初始化失敗:", e);
+      document.body.innerHTML = `
+        <div style="display:flex;flex-direction:column;justify-content:center;align-items:center;height:100vh;font-family:sans-serif;text-align:center;">
+          <h2>❌ LIFF 初始化失敗</h2>
+          <p>${e.message}</p>
+        </div>`;
+    }
+  }
+
+  // ✅ Construct 3 啟動函式
+  function startConstruct3() {
+    const scripts = [
+      "scripts/modernjscheck.js",
+      "scripts/supportcheck.js",
+      "scripts/offlineclient.js",
+      "scripts/main.js",
+      "scripts/register-sw.js"
+    ];
+    for (const src of scripts) {
+      const s = document.createElement("script");
+      s.src = src;
+      if (src.endsWith(".js")) s.type = src.includes("module") ? "module" : "text/javascript";
+      document.body.appendChild(s);
+    }
+  }
+
+  window.addEventListener("DOMContentLoaded", initLiff);
+  </script>
+</head>
+
 <body>
-
-	
-
-<script>
-if (location.protocol.substr(0, 4) === "file")
-{
-	alert("Web exports won't work until you upload them. (When running on the file: protocol, browsers block many features from working for security reasons.)");
-}
-</script>
-	
-	<noscript>
-		<div id="notSupportedWrap">
-			<h2 id="notSupportedTitle">This content requires JavaScript</h2>
-			<p class="notSupportedMessage">JavaScript appears to be disabled. Please enable it to view this content.</p>
-		</div>
-	</noscript>
-	<script src="scripts/modernjscheck.js"></script>
-	<script src="scripts/supportcheck.js"></script>
-	<script src="scripts/offlineclient.js" type="module"></script>
-	<script src="scripts/main.js" type="module"></script>
-	<script src="scripts/register-sw.js" type="module"></script>
-
-</body> 
+  <noscript>
+    <div id="notSupportedWrap">
+      <h2>此內容需要 JavaScript</h2>
+      <p>請啟用 JavaScript 以查看此內容。</p>
+    </div>
+  </noscript>
+</body>
 </html>
