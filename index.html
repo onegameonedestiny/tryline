@@ -1,74 +1,49 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <meta charset="UTF-8">
-  <title>Construct 3 + LINE LIFF 安全啟動002</title>
-  <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
-  <meta name="generator" content="Scirra Construct">
+    <meta charset="UTF-8">
+	<title>555</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no">
+	
+	<!-- Made with Construct, the game and app creator :: https://www.construct.net -->
+	<meta name="generator" content="Scirra Construct">
 
-  <!-- Construct 3 必要資源 -->
-  <link rel="manifest" href="appmanifest.json">
-  <link rel="apple-touch-icon" sizes="128x128" href="icons/icon-128.png">
-  <link rel="apple-touch-icon" sizes="256x256" href="icons/icon-256.png">
-  <link rel="apple-touch-icon" sizes="512x512" href="icons/icon-512.png">
-  <link rel="icon" type="image/png" href="icons/icon-512.png">
-  <link rel="stylesheet" href="style.css">
 
-  <!-- LINE LIFF SDK -->
-  <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
-  <script>
-    const LIFF_ID = "2008129352-Ml3XP4xL"; // ← 換成你的 LIFF ID
 
-    async function checkLineClient() {
-      try {
-        await liff.init({ liffId: LIFF_ID });
-        console.log("[DEBUG] LIFF 初始化完成，isInClient =", liff.isInClient());
+	<link rel="manifest" href="appmanifest.json">
+	<link rel="apple-touch-icon" sizes="128x128" href="icons/icon-128.png">
+	<link rel="apple-touch-icon" sizes="256x256" href="icons/icon-256.png">
+	<link rel="apple-touch-icon" sizes="512x512" href="icons/icon-512.png">
+	<link rel="icon" type="image/png" href="icons/icon-512.png">
 
-        // 若不是在 LINE App 內，顯示提示並中止載入遊戲
-        if (!liff.isInClient()) {
-          document.body.innerHTML = `
-            <div style="display:flex;align-items:center;justify-content:center;height:100vh;text-align:center;font-family:sans-serif;padding:2em;">
-              <div>
-                <h2>⚠️ 請從 LINE App 開啟此遊戲</h2>
-                <p>目前偵測到您在外部瀏覽器中開啟，請回到 LINE 聊天室點入連結。</p>
-              </div>
-            </div>`;
-          console.warn("[DEBUG] 外部瀏覽器開啟，已中止 Construct 3 載入");
-          return;
-        }
+	<link rel="stylesheet" href="style.css">
 
-        console.log("[DEBUG] 在 LINE App 內，允許啟動遊戲");
 
-      } catch (err) {
-        console.error("[ERROR] LIFF 初始化失敗:", err);
-        document.body.innerHTML = `
-          <div style="display:flex;align-items:center;justify-content:center;height:100vh;text-align:center;font-family:sans-serif;padding:2em;">
-            <div>
-              <h2>❌ LIFF 初始化失敗</h2>
-              <p>${err}</p>
-            </div>
-          </div>`;
-      }
-    }
 
-    // 在頁面載入前先檢查 LIFF
-    window.addEventListener("DOMContentLoaded", checkLineClient);
-  </script>
-</head>
-
+</head> 
+ 
 <body>
-  <noscript>
-    <div id="notSupportedWrap">
-      <h2 id="notSupportedTitle">This content requires JavaScript</h2>
-      <p class="notSupportedMessage">JavaScript appears to be disabled. Please enable it to view this content.</p>
-    </div>
-  </noscript>
 
-  <!-- Construct 3 的自動載入腳本（保持原樣） -->
-  <script src="scripts/modernjscheck.js"></script>
-  <script src="scripts/supportcheck.js"></script>
-  <script src="scripts/offlineclient.js" type="module"></script>
-  <script src="scripts/main.js" type="module"></script>
-  <script src="scripts/register-sw.js" type="module"></script>
-</body>
+	
+
+<script>
+if (location.protocol.substr(0, 4) === "file")
+{
+	alert("Web exports won't work until you upload them. (When running on the file: protocol, browsers block many features from working for security reasons.)");
+}
+</script>
+	
+	<noscript>
+		<div id="notSupportedWrap">
+			<h2 id="notSupportedTitle">This content requires JavaScript</h2>
+			<p class="notSupportedMessage">JavaScript appears to be disabled. Please enable it to view this content.</p>
+		</div>
+	</noscript>
+	<script src="scripts/modernjscheck.js"></script>
+	<script src="scripts/supportcheck.js"></script>
+	<script src="scripts/offlineclient.js" type="module"></script>
+	<script src="scripts/main.js" type="module"></script>
+	<script src="scripts/register-sw.js" type="module"></script>
+
+</body> 
 </html>
