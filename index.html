@@ -2,63 +2,57 @@
 <html>
 <head>
   <meta charset="UTF-8">
-  <title>LIFF C3 Debug</title>
+  <title>LIFF + C3 安全啟動</title>
   <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+  <meta name="generator" content="Scirra Construct">
 
+  <link rel="manifest" href="appmanifest.json">
+  <link rel="apple-touch-icon" sizes="128x128" href="icons/icon-128.png">
+  <link rel="apple-touch-icon" sizes="256x256" href="icons/icon-256.png">
+  <link rel="apple-touch-icon" sizes="512x512" href="icons/icon-512.png">
+  <link rel="icon" type="image/png" href="icons/icon-512.png">
+
+  <link rel="stylesheet" href="style.css">
   <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+</head>
+
+<body style="font-family:sans-serif;text-align:center;padding:2em;">
+  <h2>🔄 初始化 LIFF 中...</h2>
+  <p>請稍候...</p>
+
   <script>
   async function initLiff() {
-    const LIFF_ID = "2008129352-Ml3XP4xL"; // 換成你的 LIFF ID
+    const LIFF_ID = "2008129352-Ml3XP4xL"; // ← 換成你的 LIFF ID
     try {
+      console.log("[DEBUG] 初始化 LIFF...");
       await liff.init({ liffId: LIFF_ID });
-      console.log("[DEBUG] liff.init done");
+      console.log("[DEBUG] liff.init 完成");
 
+      // 如果不是在 LINE APP 裡
+      if (!liff.isInClient()) {
+        document.body.innerHTML = `
+          <h2>⚠️ 請從 LINE App 開啟此遊戲</h2>
+          <p>目前偵測到您在外部瀏覽器中開啟，請回到 LINE 聊天室點入連結。</p>`;
+        console.warn("[DEBUG] Not inside LINE client.");
+        return;
+      }
+
+      // 尚未登入
       if (!liff.isLoggedIn()) {
+        console.log("[DEBUG] 未登入，導向登入中...");
         liff.login({ redirectUri: location.href });
         return;
       }
 
+      // 已登入
       const profile = await liff.getProfile();
+      console.log("[DEBUG] profile =", profile);
+
+      // 寫入 localStorage
       localStorage.setItem("userId", profile.userId || "");
-      localStorage.setItem("displayName", profile.displayName || "");
+      localStorage.setItem("displayName", profile.displayName || "(未提供名稱)");
       localStorage.setItem("pictureUrl", profile.pictureUrl || "");
       localStorage.setItem("statusMessage", profile.statusMessage || "");
 
-      // 顯示在頁面上，確認資料有成功寫入
-      const info = `
-        <h3>LIFF 已登入</h3>
-        <p><b>ID:</b> ${profile.userId}</p>
-        <p><b>名稱:</b> ${profile.displayName}</p>
-        <p><b>狀態:</b> ${profile.statusMessage || "(無)"}</p>
-        <p><b>圖片:</b><br><img src="${profile.pictureUrl}" width="80"></p>
-        <hr>
-        <p>2 秒後將啟動 Construct 3...</p>
-      `;
-      document.body.innerHTML = info;
-
-      // 等兩秒後再啟動 C3
-      setTimeout(() => {
-        startConstruct3();
-      }, 2000);
-
-    } catch (err) {
-      console.error("[ERROR] LIFF 初始化失敗:", err);
-      document.body.innerHTML = "<h3>❌ LIFF 初始化失敗</h3><p>" + err + "</p>";
-    }
-  }
-
-  function startConstruct3() {
-    console.log("[DEBUG] startConstruct3");
-    const s = document.createElement("script");
-    s.type = "module";
-    s.src = "scripts/main.js";
-    document.body.appendChild(s);
-  }
-
-  window.addEventListener("load", initLiff);
-  </script>
-</head>
-<body style="font-family:sans-serif;text-align:center;padding:2em;">
-  <h3>初始化 LIFF 中...</h3>
-</body>
-</html>
+      // 在畫面上顯示確認
+      document.body
