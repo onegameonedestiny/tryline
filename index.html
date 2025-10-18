@@ -1,49 +1,106 @@
 <!DOCTYPE html>
-<html>
+<html lang="zh-Hant">
 <head>
-    <meta charset="UTF-8">
-	<title>666</title>
-	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no">
-	
-	<!-- Made with Construct, the game and app creator :: https://www.construct.net -->
-	<meta name="generator" content="Scirra Construct">
+  <meta charset="UTF-8">
+  <title>Water Walker</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+  <meta name="generator" content="Scirra Construct">
 
+  <!-- Construct 3 用的資源 -->
+  <link rel="manifest" href="appmanifest.json">
+  <link rel="icon" type="image/png" href="icons/icon-512.png">
+  <link rel="stylesheet" href="style.css">
 
+  <!-- ✅ LINE LIFF SDK -->
+  <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+</head>
 
-	<link rel="manifest" href="appmanifest.json">
-	<link rel="apple-touch-icon" sizes="128x128" href="icons/icon-128.png">
-	<link rel="apple-touch-icon" sizes="256x256" href="icons/icon-256.png">
-	<link rel="apple-touch-icon" sizes="512x512" href="icons/icon-512.png">
-	<link rel="icon" type="image/png" href="icons/icon-512.png">
+<body style="margin:0;overflow:hidden;background:black;color:white;text-align:center;font-family:sans-serif;">
+  <h3>🔄 正在初始化 LIFF...</h3>
+  <p>請稍候...</p>
 
-	<link rel="stylesheet" href="style.css">
+  <script>
+  // --------------------------------------------
+  // 🔧 移除舊的 Service Worker，確保載入最新版
+  // --------------------------------------------
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.getRegistrations().then(regs => regs.forEach(r => r.unregister()));
+    if (window.caches) caches.keys().then(keys => keys.forEach(k => caches.delete(k)));
+  }
 
+  // --------------------------------------------
+  // 🚀 初始化 LIFF 並啟動 Construct 3
+  // --------------------------------------------
+  const LIFF_ID = "2008129352-Ml3XP4xL"; // ← 你的 LIFF ID
 
+  async function initLiffAndStartC3() {
+    try {
+      console.log("🔹 開始初始化 LIFF...");
+      await liff.init({ liffId: LIFF_ID });
 
-</head> 
- 
-<body>
+      // 如果未登入 → 自動登入
+      if (!liff.isLoggedIn()) {
+        console.log("🟠 尚未登入，導向登入頁...");
+        liff.login({ redirectUri: location.href });
+        return;
+      }
 
-	
+      // 取得使用者資料
+      const profile = await liff.getProfile();
+      console.log("✅ 成功取得 LINE Profile：", profile);
 
-<script>
-if (location.protocol.substr(0, 4) === "file")
-{
-	alert("Web exports won't work until you upload them. (When running on the file: protocol, browsers block many features from working for security reasons.)");
-}
-</script>
-	
-	<noscript>
-		<div id="notSupportedWrap">
-			<h2 id="notSupportedTitle">This content requires JavaScript</h2>
-			<p class="notSupportedMessage">JavaScript appears to be disabled. Please enable it to view this content.</p>
-		</div>
-	</noscript>
-	<script src="scripts/modernjscheck.js"></script>
-	<script src="scripts/supportcheck.js"></script>
-	<script src="scripts/offlineclient.js" type="module"></script>
-	<script src="scripts/main.js" type="module"></script>
-	<script src="scripts/register-sw.js" type="module"></script>
+      // 建立全域變數給 C3 使用
+      window.LIFF_USER = {
+        id: profile.userId,
+        name: profile.displayName,
+        picture: profile.pictureUrl || "",
+        status: profile.statusMessage || ""
+      };
+      console.log("✅ 已建立 window.LIFF_USER：", window.LIFF_USER);
 
-</body> 
+      // 清空畫面（確保 C3 畫面置中）
+      document.body.innerHTML = "";
+
+      // 啟動 Construct 3
+      startConstruct3();
+
+    } catch (err) {
+      console.error("❌ LIFF 初始化錯誤：", err);
+      document.body.innerHTML = `
+        <h2>⚠️ 初始化失敗</h2>
+        <p>${err.message}</p>`;
+    }
+  }
+
+  // --------------------------------------------
+  // 🚀 Construct 3 啟動（保持原始位置，不影響畫面）
+  // --------------------------------------------
+  function startConstruct3() {
+    console.log("🚀 Construct 3 啟動中...");
+
+    const scriptList = [
+      "scripts/modernjscheck.js",
+      "scripts/supportcheck.js",
+      "scripts/offlineclient.js",
+      "scripts/main.js"
+      // ❌ 不載入 register-sw.js（避免快取舊版）
+    ];
+
+    // 用原本順序載入，確保 C3 畫面正常
+    for (const src of scriptList) {
+      const s = document.createElement("script");
+      s.src = src;
+      s.type = "text/javascript";
+      document.body.appendChild(s);
+    }
+
+    console.log("✅ Construct 3 全部載入完成");
+  }
+
+  // --------------------------------------------
+  // 🚀 啟動
+  // --------------------------------------------
+  initLiffAndStartC3();
+  </script>
+</body>
 </html>
