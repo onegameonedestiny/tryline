@@ -1,104 +1,49 @@
 <!DOCTYPE html>
-<html lang="zh-Hant">
+<html>
 <head>
-  <meta charset="UTF-8">
-  <title>LIFF + Construct 3</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-  <meta name="generator" content="Scirra Construct">
+    <meta charset="UTF-8">
+	<title>666</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no">
+	
+	<!-- Made with Construct, the game and app creator :: https://www.construct.net -->
+	<meta name="generator" content="Scirra Construct">
 
-  <!-- Construct 3 基本資源 -->
-  <link rel="manifest" href="appmanifest.json">
-  <link rel="stylesheet" href="style.css">
-  <link rel="icon" type="image/png" href="icons/icon-512.png">
 
-  <!-- LINE LIFF SDK -->
-  <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
-</head>
 
-<body style="margin:0;padding:0;text-align:center;background:#000;color:#fff;">
-  <h3 id="loadingMsg" style="margin-top:40vh;">初始化中...</h3>
+	<link rel="manifest" href="appmanifest.json">
+	<link rel="apple-touch-icon" sizes="128x128" href="icons/icon-128.png">
+	<link rel="apple-touch-icon" sizes="256x256" href="icons/icon-256.png">
+	<link rel="apple-touch-icon" sizes="512x512" href="icons/icon-512.png">
+	<link rel="icon" type="image/png" href="icons/icon-512.png">
 
-  <script>
-  // 🧹 Step 1: 清除快取與 Service Worker（確保版本更新）
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.getRegistrations().then(regs => {
-      for (let reg of regs) reg.unregister();
-    });
-    if (window.caches) {
-      caches.keys().then(keys => keys.forEach(k => caches.delete(k)));
-    }
-  }
+	<link rel="stylesheet" href="style.css">
 
-  // 🟢 Step 2: 初始化 LIFF
-  async function initLiffAndStart() {
-    const LIFF_ID = "2008129352-Ml3XP4xL"; // ← 你的 LIFF ID
-    try {
-      await liff.init({ liffId: LIFF_ID });
 
-      if (!liff.isLoggedIn()) {
-        liff.login({ redirectUri: location.href });
-        return;
-      }
 
-      const profile = await liff.getProfile();
-      window.LIFF_USER = {
-        id: profile.userId,
-        name: profile.displayName,
-        picture: profile.pictureUrl
-      };
-      console.log("✅ LIFF 已載入：", window.LIFF_USER);
+</head> 
+ 
+<body>
 
-      document.getElementById("loadingMsg").textContent =
-        `歡迎，${profile.displayName}！遊戲載入中...`;
+	
 
-      // 稍微延遲啟動 C3，確保 LIFF_USER 存在
-      setTimeout(startConstruct3, 1000);
-    } catch (err) {
-      console.warn("⚠️ LIFF 初始化失敗：", err);
-      window.LIFF_USER = { id: "guest", name: "訪客" };
-      document.getElementById("loadingMsg").textContent = "以訪客身份載入遊戲...";
-      setTimeout(startConstruct3, 500);
-    }
-  }
+<script>
+if (location.protocol.substr(0, 4) === "file")
+{
+	alert("Web exports won't work until you upload them. (When running on the file: protocol, browsers block many features from working for security reasons.)");
+}
+</script>
+	
+	<noscript>
+		<div id="notSupportedWrap">
+			<h2 id="notSupportedTitle">This content requires JavaScript</h2>
+			<p class="notSupportedMessage">JavaScript appears to be disabled. Please enable it to view this content.</p>
+		</div>
+	</noscript>
+	<script src="scripts/modernjscheck.js"></script>
+	<script src="scripts/supportcheck.js"></script>
+	<script src="scripts/offlineclient.js" type="module"></script>
+	<script src="scripts/main.js" type="module"></script>
+	<script src="scripts/register-sw.js" type="module"></script>
 
-  // 🚀 Step 3: 啟動 Construct 3
-  function startConstruct3() {
-    console.log("🚀 啟動 Construct 3...");
-
-    // 刪除提示文字但保留 body 結構
-    const msg = document.getElementById("loadingMsg");
-    if (msg) msg.remove();
-
-    // 依照官方建議順序載入
-    const scriptUrls = [
-      "scripts/modernjscheck.js",
-      "scripts/supportcheck.js",
-      "scripts/offlineclient.js",
-      "scripts/main.js",       // ✅ Construct runtime
-      "scripts/register-sw.js"
-    ];
-
-    (async () => {
-      for (const url of scriptUrls) {
-        await loadScript(url);
-      }
-      console.log("✅ Construct 3 全部載入完成");
-    })();
-  }
-
-  // 動態載入 script 並確保順序
-  function loadScript(src) {
-    return new Promise((resolve, reject) => {
-      const s = document.createElement("script");
-      s.src = src;
-      s.onload = resolve;
-      s.onerror = reject;
-      document.body.appendChild(s);
-    });
-  }
-
-  // 🔄 Step 4: 啟動流程
-  initLiffAndStart();
-  </script>
-</body>
+</body> 
 </html>

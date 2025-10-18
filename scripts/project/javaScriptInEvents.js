@@ -5,7 +5,7 @@ const scriptsInEvents = {
 	async 事件表1_Event2(runtime, localVars)
 	{
 // 取得 Construct 3 runtime
-const runtime = globalThis.C3?.runtime;
+const rt = globalThis.C3?.runtime;
 
 // 嘗試從 window.LIFF_USER 取得資料
 const user = window.LIFF_USER;
