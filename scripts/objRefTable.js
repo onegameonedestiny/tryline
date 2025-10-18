@@ -4,15 +4,18 @@ self.C3_GetObjectRefTable = function () {
 		C3.Plugins.Text,
 		C3.Plugins.Button,
 		C3.Plugins.Button.Cnds.OnClicked,
-		C3.JavaScriptInEvents.事件表1_Event2,
-		C3.Plugins.Text.Acts.SetText
+		C3.Plugins.Text.Acts.SetText,
+		C3.Plugins.System.Cnds.OnLayoutStart,
+		C3.JavaScriptInEvents.事件表1_Event3,
+		C3.JavaScriptInEvents.事件表1_Event5
 	];
 };
 self.C3_JsPropNameTable = [
 	{text: 0},
 	{按鈕: 0},
 	{按鈕2: 0},
-	{NAME: 0}
+	{NAME: 0},
+	{NAME2: 0}
 ];
 
 self.InstanceType = {
