@@ -28,7 +28,7 @@
         console.log("✅ [HTML] LIFF 初始化成功");
 
         if (!liff.isLoggedIn()) {
-          console.log("⚠️ [HTML] 未登入，進行登入中...");
+          console.log("⚠️ [HTML] 未登入，導向登入...");
           liff.login({ redirectUri: location.href });
           return;
         }
@@ -36,7 +36,7 @@
         const profile = await liff.getProfile();
         console.log("✅ [HTML] 成功取得 LINE Profile：", profile);
 
-        // 建立全域物件供 C3 使用
+        // 建立全域變數供 C3 取用
         window.LIFF_USER = {
           name: profile.displayName,
           userId: profile.userId,
@@ -45,56 +45,64 @@
         };
         console.log("🧩 [HTML] 已建立 window.LIFF_USER：", window.LIFF_USER);
 
-        // 檢查 runtime 狀態
-        await waitForConstructRuntime();
-
-        // 更新 Construct 3
-        const rt = globalThis.C3_GetRuntime?.() || globalThis.C3?.runtime;
-        if (rt) {
-          rt.globalVars.NAME = window.LIFF_USER.name;
-          const txt = rt.objects.Text?.getFirstInstance?.();
-          if (txt) txt.text = `你好，${window.LIFF_USER.name}！`;
-          console.log("✨ [HTML] 已更新 C3 內的文字物件");
-        } else {
-          console.warn("❌ [HTML] 找不到 Construct 3 runtime");
-        }
+        // 🔹 這裡不等待 runtime，改成監聽 Construct 載入完成後再更新
+        window.addEventListener("C3Ready", updateConstruct);
 
       } catch (err) {
         console.error("💥 [HTML] LIFF 初始化失敗：", err);
-        alert("無法初始化 LIFF，請從 LINE App 內重新開啟。");
+        alert("LIFF 初始化成功，但 Construct 尚未載入或有錯誤。");
       }
     }
 
-    // 等待 Construct 3 runtime 建立
-    async function waitForConstructRuntime() {
-      let rt;
-      let retries = 0;
-      while (!rt && retries < 100) {
-        rt = globalThis.C3_GetRuntime?.() || globalThis.C3?.runtime;
-        if (rt) {
-          console.log("✅ [HTML] Construct 3 runtime 已建立");
-          return rt;
-        }
-        retries++;
-        console.log("⏳ [HTML] 等待 Construct 3 runtime... 第", retries, "次");
-        await new Promise(r => setTimeout(r, 100));
+    // Construct 啟動後呼叫
+    async function updateConstruct() {
+      console.log("🚀 [HTML] 收到 C3Ready 事件，準備更新文字");
+      const rt = globalThis.C3_GetRuntime?.() || globalThis.C3?.runtime;
+
+      if (!rt) {
+        console.warn("❌ [HTML] Construct runtime 仍不存在");
+        return;
       }
-      throw new Error("Construct 3 runtime 無法建立");
+
+      if (!window.LIFF_USER) {
+        console.warn("⚠️ [HTML] 尚未取得 LIFF_USER，略過更新");
+        return;
+      }
+
+      rt.globalVars.NAME = window.LIFF_USER.name;
+      const txt = rt.objects.Text?.getFirstInstance?.();
+      if (txt) txt.text = `你好，${window.LIFF_USER.name}！`;
+      console.log("✨ [HTML] 成功更新 Construct 文字物件");
     }
 
-    // 初始化流程
+    // Construct 初始化完成時會自動呼叫此事件
     window.addEventListener("load", () => {
+      console.log("🚀 [HTML] 頁面載入，啟動 LIFF 初始化");
       initLiff();
-      console.log("🚀 [HTML] Construct 3 啟動中...");
     });
+
+    // Construct 的 runtime 載入完後手動派發事件
+    (function waitForC3() {
+      let retries = 0;
+      const timer = setInterval(() => {
+        const rt = globalThis.C3_GetRuntime?.() || globalThis.C3?.runtime;
+        if (rt) {
+          clearInterval(timer);
+          console.log("✅ [HTML] Construct runtime 準備完成");
+          window.dispatchEvent(new Event("C3Ready"));
+        } else if (++retries > 100) {
+          clearInterval(timer);
+          console.error("❌ [HTML] Construct runtime 初始化超時");
+        }
+      }, 100);
+    })();
   </script>
 
-  <!-- ✅ Construct 3 核心腳本 -->
+  <!-- ✅ Construct 3 核心 -->
   <script src="scripts/modernjscheck.js"></script>
   <script src="scripts/supportcheck.js"></script>
   <script src="scripts/offlineclient.js" type="module"></script>
   <script src="scripts/main.js" type="module"></script>
   <script src="scripts/register-sw.js" type="module"></script>
-
 </body>
 </html>
