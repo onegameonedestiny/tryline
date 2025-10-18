@@ -1,12 +1,12 @@
 <!DOCTYPE html>
-<html>
+<html lang="zh-Hant">
 <head>
   <meta charset="UTF-8">
   <title>LIFF + Construct 3</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
   <meta name="generator" content="Scirra Construct">
 
-  <!-- Construct 3 資源 -->
+  <!-- Construct 3 必要資源 -->
   <link rel="manifest" href="appmanifest.json">
   <link rel="stylesheet" href="style.css">
   <link rel="icon" type="image/png" href="icons/icon-512.png">
@@ -15,30 +15,33 @@
   <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
 </head>
 
-<body>
-  <h3 id="loadingMsg" style="text-align:center;">初始化中...</h3>
+<body style="margin:0;padding:0;text-align:center;background:#000;color:#fff;">
+  <h3 id="loadingMsg" style="margin-top:40vh;">初始化中...</h3>
 
   <script>
-  // 🟢 初始化 LIFF 並設定 window.LIFF_USER
+  // 🧹 1️⃣ 移除舊版 Service Worker + Cache（避免讀舊畫面）
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.getRegistrations().then(regs => {
+      for (let reg of regs) reg.unregister();
+    });
+    if (window.caches) {
+      caches.keys().then(keys => keys.forEach(k => caches.delete(k)));
+    }
+  }
+
+  // 🟢 2️⃣ 初始化 LIFF 並設定 window.LIFF_USER
   async function initLiffAndStart() {
     const LIFF_ID = "2008129352-Ml3XP4xL"; // ← 換成你的 LIFF ID
     try {
       await liff.init({ liffId: LIFF_ID });
 
-      // 如果不是在 LINE App 裡
-      if (!liff.isInClient()) {
-        document.body.innerHTML = `
-          <h2>⚠️ 請從 LINE App 開啟此遊戲</h2>
-          <p>目前偵測到您在外部瀏覽器中開啟，請回到 LINE 聊天室點入連結。</p>`;
-        return;
-      }
-
-      // 若尚未登入
+      // 如果未登入，自動導向登入
       if (!liff.isLoggedIn()) {
         liff.login({ redirectUri: location.href });
         return;
       }
 
+      // 取得 LINE 使用者資料
       const profile = await liff.getProfile();
       window.LIFF_USER = {
         id: profile.userId,
@@ -48,20 +51,27 @@
       };
       console.log("✅ LIFF 資料載入成功：", window.LIFF_USER);
 
-      // 顯示確認文字
+      // 更新提示
       document.getElementById("loadingMsg").textContent =
-        `歡迎，${profile.displayName}！載入 Construct 3...`;
+        `歡迎，${profile.displayName}！正在載入遊戲...`;
 
-      // 延遲一秒以確保 window.LIFF_USER 已存在
+      // 延遲 1 秒後啟動 Construct 3
       setTimeout(startConstruct3, 1000);
     } catch (err) {
-      document.body.innerHTML = `<h2>❌ LIFF 初始化失敗</h2><p>${err.message}</p>`;
-      console.error(err);
+      console.error("❌ LIFF 初始化失敗：", err);
+      // 即使失敗，也讓遊戲能開啟（但沒有 LINE 資料）
+      window.LIFF_USER = { id: "guest", name: "訪客" };
+      document.getElementById("loadingMsg").textContent =
+        "未取得 LINE 資料，載入遊戲中...";
+      setTimeout(startConstruct3, 1000);
     }
   }
 
-  // 🟢 Construct 3 啟動（保持與原 export 結構一致）
+  // 🚀 3️⃣ 啟動 Construct 3（確保畫面置中）
   function startConstruct3() {
+    // 清空 body，避免文字殘留導致畫面錯位
+    document.body.innerHTML = "";
+
     const scriptList = [
       "scripts/modernjscheck.js",
       "scripts/supportcheck.js",
@@ -73,14 +83,14 @@
     for (const src of scriptList) {
       const s = document.createElement("script");
       s.src = src;
-      s.type = src.endsWith(".js") ? (src.includes("module") ? "module" : "text/javascript") : "";
+      s.type = "text/javascript";
       document.body.appendChild(s);
     }
 
     console.log("🚀 Construct 3 已啟動");
   }
 
-  // 啟動流程
+  // 🔄 啟動流程
   initLiffAndStart();
   </script>
 </body>
