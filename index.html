@@ -1,49 +1,87 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <meta charset="UTF-8">
-	<title>555</title>
-	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no">
-	
-	<!-- Made with Construct, the game and app creator :: https://www.construct.net -->
-	<meta name="generator" content="Scirra Construct">
+  <meta charset="UTF-8">
+  <title>LIFF + Construct 3</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <meta name="generator" content="Scirra Construct">
 
+  <!-- Construct 3 資源 -->
+  <link rel="manifest" href="appmanifest.json">
+  <link rel="stylesheet" href="style.css">
+  <link rel="icon" type="image/png" href="icons/icon-512.png">
 
+  <!-- LINE LIFF SDK -->
+  <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+</head>
 
-	<link rel="manifest" href="appmanifest.json">
-	<link rel="apple-touch-icon" sizes="128x128" href="icons/icon-128.png">
-	<link rel="apple-touch-icon" sizes="256x256" href="icons/icon-256.png">
-	<link rel="apple-touch-icon" sizes="512x512" href="icons/icon-512.png">
-	<link rel="icon" type="image/png" href="icons/icon-512.png">
-
-	<link rel="stylesheet" href="style.css">
-
-
-
-</head> 
- 
 <body>
+  <h3 id="loadingMsg" style="text-align:center;">初始化中...</h3>
 
-	
+  <script>
+  // 🟢 初始化 LIFF 並設定 window.LIFF_USER
+  async function initLiffAndStart() {
+    const LIFF_ID = "2008129352-Ml3XP4xL"; // ← 換成你的 LIFF ID
+    try {
+      await liff.init({ liffId: LIFF_ID });
 
-<script>
-if (location.protocol.substr(0, 4) === "file")
-{
-	alert("Web exports won't work until you upload them. (When running on the file: protocol, browsers block many features from working for security reasons.)");
-}
-</script>
-	
-	<noscript>
-		<div id="notSupportedWrap">
-			<h2 id="notSupportedTitle">This content requires JavaScript</h2>
-			<p class="notSupportedMessage">JavaScript appears to be disabled. Please enable it to view this content.</p>
-		</div>
-	</noscript>
-	<script src="scripts/modernjscheck.js"></script>
-	<script src="scripts/supportcheck.js"></script>
-	<script src="scripts/offlineclient.js" type="module"></script>
-	<script src="scripts/main.js" type="module"></script>
-	<script src="scripts/register-sw.js" type="module"></script>
+      // 如果不是在 LINE App 裡
+      if (!liff.isInClient()) {
+        document.body.innerHTML = `
+          <h2>⚠️ 請從 LINE App 開啟此遊戲</h2>
+          <p>目前偵測到您在外部瀏覽器中開啟，請回到 LINE 聊天室點入連結。</p>`;
+        return;
+      }
 
-</body> 
+      // 若尚未登入
+      if (!liff.isLoggedIn()) {
+        liff.login({ redirectUri: location.href });
+        return;
+      }
+
+      const profile = await liff.getProfile();
+      window.LIFF_USER = {
+        id: profile.userId,
+        name: profile.displayName,
+        picture: profile.pictureUrl,
+        status: profile.statusMessage
+      };
+      console.log("✅ LIFF 資料載入成功：", window.LIFF_USER);
+
+      // 顯示確認文字
+      document.getElementById("loadingMsg").textContent =
+        `歡迎，${profile.displayName}！載入 Construct 3...`;
+
+      // 延遲一秒以確保 window.LIFF_USER 已存在
+      setTimeout(startConstruct3, 1000);
+    } catch (err) {
+      document.body.innerHTML = `<h2>❌ LIFF 初始化失敗</h2><p>${err.message}</p>`;
+      console.error(err);
+    }
+  }
+
+  // 🟢 Construct 3 啟動（保持與原 export 結構一致）
+  function startConstruct3() {
+    const scriptList = [
+      "scripts/modernjscheck.js",
+      "scripts/supportcheck.js",
+      "scripts/offlineclient.js",
+      "scripts/main.js",
+      "scripts/register-sw.js"
+    ];
+
+    for (const src of scriptList) {
+      const s = document.createElement("script");
+      s.src = src;
+      s.type = src.endsWith(".js") ? (src.includes("module") ? "module" : "text/javascript") : "";
+      document.body.appendChild(s);
+    }
+
+    console.log("🚀 Construct 3 已啟動");
+  }
+
+  // 啟動流程
+  initLiffAndStart();
+  </script>
+</body>
 </html>
