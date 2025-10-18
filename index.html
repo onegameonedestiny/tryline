@@ -1,8 +1,8 @@
 <!DOCTYPE html>
-<html lang="zh-Hant">
+<html>
 <head>
   <meta charset="UTF-8">
-  <title>666</title>
+  <title>LIFF + Construct3</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <meta name="generator" content="Scirra Construct">
 
@@ -13,77 +13,88 @@
   <link rel="icon" type="image/png" href="icons/icon-512.png">
   <link rel="stylesheet" href="style.css">
 
-  <!-- ✅ LIFF SDK -->
+  <!-- ✅ 載入 LIFF SDK -->
   <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
 </head>
 
-<body>
-<script>
-if (location.protocol.substr(0, 4) === "file") {
-  alert("Web exports won't work until you upload them. (When running on the file: protocol, browsers block many features from working for security reasons.)");
-}
-</script>
+<body style="margin:0; padding:0; overflow:hidden; background:#000;">
+  <script>
+    const LIFF_ID = "2008129352-Ml3XP4xL"; // 換成你的 LIFF ID
 
-<noscript>
-  <div id="notSupportedWrap">
-    <h2 id="notSupportedTitle">This content requires JavaScript</h2>
-    <p class="notSupportedMessage">JavaScript appears to be disabled. Please enable it to view this content.</p>
-  </div>
-</noscript>
+    async function initLiff() {
+      console.log("🟢 [HTML] 開始初始化 LIFF...");
+      try {
+        await liff.init({ liffId: LIFF_ID });
+        console.log("✅ [HTML] LIFF 初始化成功");
 
-<script>
-// 🧩 攔截 console.log：只要出現 "USER:" 就發送事件給 Construct 3
-(function() {
-  const originalLog = console.log;
-  console.log = function(...args) {
-    originalLog.apply(console, args);
-    if (args[0] === "USER:" && args[1]) {
-      const data = args[1];
-      originalLog("📤 [HTML] 偵測到 USER log，發送事件給 C3", data);
-      window.dispatchEvent(new CustomEvent("LIFF_USER", { detail: data }));
+        if (!liff.isLoggedIn()) {
+          console.log("⚠️ [HTML] 未登入，進行登入中...");
+          liff.login({ redirectUri: location.href });
+          return;
+        }
+
+        const profile = await liff.getProfile();
+        console.log("✅ [HTML] 成功取得 LINE Profile：", profile);
+
+        // 建立全域物件供 C3 使用
+        window.LIFF_USER = {
+          name: profile.displayName,
+          userId: profile.userId,
+          pictureUrl: profile.pictureUrl,
+          statusMessage: profile.statusMessage || ""
+        };
+        console.log("🧩 [HTML] 已建立 window.LIFF_USER：", window.LIFF_USER);
+
+        // 檢查 runtime 狀態
+        await waitForConstructRuntime();
+
+        // 更新 Construct 3
+        const rt = globalThis.C3_GetRuntime?.() || globalThis.C3?.runtime;
+        if (rt) {
+          rt.globalVars.NAME = window.LIFF_USER.name;
+          const txt = rt.objects.Text?.getFirstInstance?.();
+          if (txt) txt.text = `你好，${window.LIFF_USER.name}！`;
+          console.log("✨ [HTML] 已更新 C3 內的文字物件");
+        } else {
+          console.warn("❌ [HTML] 找不到 Construct 3 runtime");
+        }
+
+      } catch (err) {
+        console.error("💥 [HTML] LIFF 初始化失敗：", err);
+        alert("無法初始化 LIFF，請從 LINE App 內重新開啟。");
+      }
     }
-  };
-})();
 
-// 🧠 LIFF 初始化流程
-const LIFF_ID = "2008129352-Ml3XP4xL"; // 你的 LIFF ID
-
-async function initLiff() {
-  try {
-    console.log("🟢 [HTML] 開始初始化 LIFF...");
-    await liff.init({ liffId: LIFF_ID });
-    console.log("✅ [HTML] LIFF 初始化成功");
-
-    if (!liff.isLoggedIn()) {
-      console.log("🔁 [HTML] 尚未登入，導向登入中...");
-      liff.login({ redirectUri: location.href });
-      return;
+    // 等待 Construct 3 runtime 建立
+    async function waitForConstructRuntime() {
+      let rt;
+      let retries = 0;
+      while (!rt && retries < 100) {
+        rt = globalThis.C3_GetRuntime?.() || globalThis.C3?.runtime;
+        if (rt) {
+          console.log("✅ [HTML] Construct 3 runtime 已建立");
+          return rt;
+        }
+        retries++;
+        console.log("⏳ [HTML] 等待 Construct 3 runtime... 第", retries, "次");
+        await new Promise(r => setTimeout(r, 100));
+      }
+      throw new Error("Construct 3 runtime 無法建立");
     }
 
-    const profile = await liff.getProfile();
-    console.log("✅ [HTML] 成功取得 LINE Profile：", profile);
+    // 初始化流程
+    window.addEventListener("load", () => {
+      initLiff();
+      console.log("🚀 [HTML] Construct 3 啟動中...");
+    });
+  </script>
 
-    // 將資料存在 window 並 log 出來（會觸發事件）
-    window.LIFF_USER = {
-      name: profile.displayName,
-      userId: profile.userId,
-      pictureUrl: profile.pictureUrl,
-      statusMessage: profile.statusMessage
-    };
-    console.log("USER:", window.LIFF_USER); // 🧩 這行會觸發傳遞
-  } catch (err) {
-    console.error("❌ [HTML] LIFF 初始化錯誤：", err);
-  }
-}
+  <!-- ✅ Construct 3 核心腳本 -->
+  <script src="scripts/modernjscheck.js"></script>
+  <script src="scripts/supportcheck.js"></script>
+  <script src="scripts/offlineclient.js" type="module"></script>
+  <script src="scripts/main.js" type="module"></script>
+  <script src="scripts/register-sw.js" type="module"></script>
 
-initLiff();
-</script>
-
-<!-- ✅ Construct 3 遊戲核心 -->
-<script src="scripts/modernjscheck.js"></script>
-<script src="scripts/supportcheck.js"></script>
-<script src="scripts/offlineclient.js" type="module"></script>
-<script src="scripts/main.js" type="module"></script>
-<script src="scripts/register-sw.js" type="module"></script>
 </body>
 </html>
