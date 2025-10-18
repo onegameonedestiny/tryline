@@ -6,47 +6,33 @@ const scriptsInEvents = {
 	{
 console.log("🟢 [C3] On start of layout triggered");
 
-// 等待 Construct 3 Runtime 建立
+// 等待 runtime
 function waitForRuntime() {
-    // ✅ 使用 C3_GetRuntime() 而不是 C3.runtime
-    const rt = globalThis.C3_GetRuntime?.();
-    if (!rt) {
-        console.warn("⏳ [C3] runtime 尚未建立，100ms 後重試...");
-        setTimeout(waitForRuntime, 100);
-        return;
-    }
+  const rt = globalThis.C3_GetRuntime?.();
+  if (!rt) {
+    console.warn("⏳ [C3] runtime 尚未建立，100ms 後重試...");
+    setTimeout(waitForRuntime, 100);
+    return;
+  }
+  console.log("✅ [C3] runtime 已建立");
 
-    console.log("✅ [C3] runtime 已建立");
-    console.log("🌐 [C3] window.LIFF_USER =", window.LIFF_USER);
+  // ✅ 監聽來自 console 的事件
+  window.addEventListener("LIFF_USER", (e) => {
+    const user = e.detail;
+    console.log("📩 [C3] 收到 LIFF_USER（來自 console 傳遞）:", user);
 
-    // 註冊監聽事件
-    window.addEventListener("message", (event) => {
-        if (event.data?.type === "LIFF_USER") {
-            const user = event.data.data;
-            console.log("📩 [C3] 收到 LIFF_USER 資料：", user);
+    rt.globalVars.NAME = user.name;
+    const txt = rt.objects.Text.getFirstInstance();
+    if (txt) 按鈕2.text = `你好，${user.name}！`;
 
-            rt.globalVars.NAME = user.name;
-            const txt = rt.objects.Text.getFirstInstance();
-            if (txt) txt.text = `你好，${user.name}！`;
+    console.log("🎨 [C3] 已更新 Text 顯示名稱");
+  });
 
-            console.log("🎨 [C3] 已更新文字物件內容");
-        }
-    });
-
-    console.log("🟡 [C3] 已註冊 window.message 監聽器，等待外部訊息");
+  console.log("🟡 [C3] 已註冊 LIFF_USER 事件監聽器");
 }
 
 waitForRuntime();
 
-	},
-
-	async 事件表1_Event5(runtime, localVars)
-	{
-const rt = globalThis.C3?.runtime;
-console.log('🖱️ [C3] 按鈕被點擊');
-if (!rt) return console.error('❌ [C3] Runtime 不存在');
-console.log('📤 [C3] 現在的 NAME =', rt.globalVars.NAME);
-alert(`目前全域變數 NAME：${rt.globalVars.NAME || '(尚未設定)'}`);
 	}
 };
 

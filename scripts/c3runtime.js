@@ -1207,10 +1207,7 @@ function or(l, r)
 }
 
 self.C3_ExpressionFuncs = [
-		p => {
-			const v0 = p._GetNode(0).GetVar();
-			return () => v0.GetValue();
-		}
+		() => "名字"
 ];
 
 
