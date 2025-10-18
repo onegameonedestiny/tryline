@@ -4,33 +4,20 @@ const scriptsInEvents = {
 
 	async 事件表1_Event2(runtime, localVars)
 	{
-		
-	},
-
-	async 事件表1_Event4(runtime, localVars)
-	{
-setTimeout(() => {
-  try {
+window.addEventListener('message', (event) => {
+  if (event.data?.type === 'LIFF_USER') {
     const rt = globalThis.C3?.runtime;
-    const user = window.LIFF_USER;
+    if (!rt) return console.warn('[C3] Runtime 尚未就緒');
 
-    if (!rt) throw new Error("C3 runtime 尚未就緒");
-    if (!user) throw new Error("尚未取得 LIFF_USER");
-
-    // 🧩 寫入全域變數
+    const user = event.data.data;
     rt.globalVars.NAME = user.name;
 
-    // 🧩 更新 Text 文字物件
     const txt = rt.objects.Text.getFirstInstance();
     if (txt) txt.text = `你好，${user.name}！`;
 
-    console.log(`[C3] 成功顯示使用者名稱：${user.name}`);
-
-  } catch (err) {
-    console.warn("[C3] 錯誤：", err.message);
+    console.log('[C3] 已接收到 LIFF_USER：', user);
   }
-}, 1000);
-
+});
 	}
 };
 
