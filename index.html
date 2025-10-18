@@ -1,111 +1,49 @@
 <!DOCTYPE html>
-<html lang="zh-Hant">
+<html>
 <head>
-  <meta charset="UTF-8">
-  <title>LIFF + Construct3 整合</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <meta name="generator" content="Scirra Construct">
+    <meta charset="UTF-8">
+	<title>666</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no">
+	
+	<!-- Made with Construct, the game and app creator :: https://www.construct.net -->
+	<meta name="generator" content="Scirra Construct">
 
-  <!-- Construct 3 manifest & icons -->
-  <link rel="manifest" href="appmanifest.json">
-  <link rel="apple-touch-icon" sizes="128x128" href="icons/icon-128.png">
-  <link rel="apple-touch-icon" sizes="256x256" href="icons/icon-256.png">
-  <link rel="apple-touch-icon" sizes="512x512" href="icons/icon-512.png">
-  <link rel="icon" type="image/png" href="icons/icon-512.png">
 
-  <link rel="stylesheet" href="style.css">
 
-  <!-- LINE LIFF SDK -->
-  <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
-</head>
+	<link rel="manifest" href="appmanifest.json">
+	<link rel="apple-touch-icon" sizes="128x128" href="icons/icon-128.png">
+	<link rel="apple-touch-icon" sizes="256x256" href="icons/icon-256.png">
+	<link rel="apple-touch-icon" sizes="512x512" href="icons/icon-512.png">
+	<link rel="icon" type="image/png" href="icons/icon-512.png">
 
+	<link rel="stylesheet" href="style.css">
+
+
+
+</head> 
+ 
 <body>
-  <noscript>
-    <div id="notSupportedWrap">
-      <h2 id="notSupportedTitle">This content requires JavaScript</h2>
-      <p class="notSupportedMessage">JavaScript appears to be disabled. Please enable it to view this content.</p>
-    </div>
-  </noscript>
 
-  <script>
-    // ==============================
-    // 🟢 LIFF 初始化
-    // ==============================
-    const LIFF_ID = "2008129352-Ml3XP4xL"; // ← 你的 LIFF ID
+	
 
-    async function initLiffAndStartC3() {
-      try {
-        console.log("🟢 [HTML] 開始初始化 LIFF...");
-        await liff.init({ liffId: LIFF_ID });
-        console.log("✅ [HTML] LIFF 初始化成功");
+<script>
+if (location.protocol.substr(0, 4) === "file")
+{
+	alert("Web exports won't work until you upload them. (When running on the file: protocol, browsers block many features from working for security reasons.)");
+}
+</script>
+	
+	<noscript>
+		<div id="notSupportedWrap">
+			<h2 id="notSupportedTitle">This content requires JavaScript</h2>
+			<p class="notSupportedMessage">JavaScript appears to be disabled. Please enable it to view this content.</p>
+		</div>
+	</noscript>
+	<script src="scripts/modernjscheck.js"></script>
+	<script src="scripts/supportcheck.js"></script>
+	<script src="scripts/offlineclient.js" type="module"></script>
+	<script src="scripts/main.js" type="module"></script>
+	<script src="scripts/register-sw.js" type="module"></script>
 
-        // 若尚未登入
-        if (!liff.isLoggedIn()) {
-          console.log("🔁 [HTML] 尚未登入，重新導向登入...");
-          liff.login({ redirectUri: location.href });
-          return;
-        }
-
-        // ✅ 成功取得 LINE Profile
-        const profile = await liff.getProfile();
-        console.log("✅ [HTML] 成功取得 LINE Profile：", profile);
-
-        // 建立 LIFF_USER 全域物件
-        window.LIFF_USER = {
-          name: profile.displayName,
-          userId: profile.userId,
-          pictureUrl: profile.pictureUrl,
-          statusMessage: profile.statusMessage
-        };
-        console.log("🧩 [HTML] 已建立 window.LIFF_USER：", window.LIFF_USER);
-
-        // 延遲傳送給 Construct 3（確保 runtime 已建立）
-        function sendToC3() {
-          console.log("📨 [HTML] 傳送 LIFF_USER 給 Construct 3 (postMessage)");
-          window.postMessage({ type: "LIFF_USER", data: window.LIFF_USER }, "*");
-        }
-        setTimeout(sendToC3, 1000);
-        setTimeout(sendToC3, 2500); // 若第一次太早，2.5 秒後再送一次
-
-        // 啟動 Construct 3 遊戲
-        console.log("🚀 [HTML] Construct 3 啟動中...");
-        const script = document.createElement("script");
-        script.src = "scripts/modernjscheck.js";
-        document.body.appendChild(script);
-
-        // 依序載入 Construct 核心腳本
-        const scripts = [
-          "scripts/supportcheck.js",
-          "scripts/offlineclient.js",
-          "scripts/main.js",
-          "scripts/register-sw.js"
-        ];
-
-        let i = 0;
-        function loadNext() {
-          if (i >= scripts.length) {
-            console.log("✅ [HTML] Construct 3 載入腳本完成");
-            return;
-          }
-          const s = document.createElement("script");
-          s.src = scripts[i];
-          s.type = "module";
-          s.onload = () => {
-            i++;
-            loadNext();
-          };
-          document.body.appendChild(s);
-        }
-        loadNext();
-
-      } catch (err) {
-        console.error("❌ [HTML] LIFF 初始化失敗：", err);
-        document.body.innerHTML = `<h2>⚠️ LIFF 初始化失敗</h2><p>${err.message}</p>`;
-      }
-    }
-
-    // 執行初始化
-    initLiffAndStartC3();
-  </script>
-</body>
+</body> 
 </html>

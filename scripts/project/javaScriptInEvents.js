@@ -6,8 +6,10 @@ const scriptsInEvents = {
 	{
 console.log("🟢 [C3] On start of layout triggered");
 
+// 等待 Construct 3 Runtime 建立
 function waitForRuntime() {
-    const rt = globalThis.C3?.runtime;
+    // ✅ 使用 C3_GetRuntime() 而不是 C3.runtime
+    const rt = globalThis.C3_GetRuntime?.();
     if (!rt) {
         console.warn("⏳ [C3] runtime 尚未建立，100ms 後重試...");
         setTimeout(waitForRuntime, 100);
@@ -15,10 +17,9 @@ function waitForRuntime() {
     }
 
     console.log("✅ [C3] runtime 已建立");
-    console.log("🌐 [C3] window.frames.length =", window.frames.length);
     console.log("🌐 [C3] window.LIFF_USER =", window.LIFF_USER);
 
-    // 註冊 postMessage 監聽
+    // 註冊監聽事件
     window.addEventListener("message", (event) => {
         if (event.data?.type === "LIFF_USER") {
             const user = event.data.data;
@@ -35,7 +36,6 @@ function waitForRuntime() {
     console.log("🟡 [C3] 已註冊 window.message 監聽器，等待外部訊息");
 }
 
-// 啟動檢查流程
 waitForRuntime();
 
 	},
