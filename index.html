@@ -1,108 +1,49 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <meta charset="UTF-8">
-  <title>LIFF + Construct3</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <meta name="generator" content="Scirra Construct">
+    <meta charset="UTF-8">
+	<title>666</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no">
+	
+	<!-- Made with Construct, the game and app creator :: https://www.construct.net -->
+	<meta name="generator" content="Scirra Construct">
 
-  <link rel="manifest" href="appmanifest.json">
-  <link rel="apple-touch-icon" sizes="128x128" href="icons/icon-128.png">
-  <link rel="apple-touch-icon" sizes="256x256" href="icons/icon-256.png">
-  <link rel="apple-touch-icon" sizes="512x512" href="icons/icon-512.png">
-  <link rel="icon" type="image/png" href="icons/icon-512.png">
-  <link rel="stylesheet" href="style.css">
 
-  <!-- ✅ 載入 LIFF SDK -->
-  <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
-</head>
 
-<body style="margin:0; padding:0; overflow:hidden; background:#000;">
-  <script>
-    const LIFF_ID = "2008129352-Ml3XP4xL"; // 換成你的 LIFF ID
+	<link rel="manifest" href="appmanifest.json">
+	<link rel="apple-touch-icon" sizes="128x128" href="icons/icon-128.png">
+	<link rel="apple-touch-icon" sizes="256x256" href="icons/icon-256.png">
+	<link rel="apple-touch-icon" sizes="512x512" href="icons/icon-512.png">
+	<link rel="icon" type="image/png" href="icons/icon-512.png">
 
-    async function initLiff() {
-      console.log("🟢 [HTML] 開始初始化 LIFF...");
-      try {
-        await liff.init({ liffId: LIFF_ID });
-        console.log("✅ [HTML] LIFF 初始化成功");
+	<link rel="stylesheet" href="style.css">
 
-        if (!liff.isLoggedIn()) {
-          console.log("⚠️ [HTML] 未登入，導向登入...");
-          liff.login({ redirectUri: location.href });
-          return;
-        }
 
-        const profile = await liff.getProfile();
-        console.log("✅ [HTML] 成功取得 LINE Profile：", profile);
 
-        // 建立全域變數供 C3 取用
-        window.LIFF_USER = {
-          name: profile.displayName,
-          userId: profile.userId,
-          pictureUrl: profile.pictureUrl,
-          statusMessage: profile.statusMessage || ""
-        };
-        console.log("🧩 [HTML] 已建立 window.LIFF_USER：", window.LIFF_USER);
+</head> 
+ 
+<body>
 
-        // 🔹 這裡不等待 runtime，改成監聽 Construct 載入完成後再更新
-        window.addEventListener("C3Ready", updateConstruct);
+	
 
-      } catch (err) {
-        console.error("💥 [HTML] LIFF 初始化失敗：", err);
-        alert("LIFF 初始化成功，但 Construct 尚未載入或有錯誤。");
-      }
-    }
+<script>
+if (location.protocol.substr(0, 4) === "file")
+{
+	alert("Web exports won't work until you upload them. (When running on the file: protocol, browsers block many features from working for security reasons.)");
+}
+</script>
+	
+	<noscript>
+		<div id="notSupportedWrap">
+			<h2 id="notSupportedTitle">This content requires JavaScript</h2>
+			<p class="notSupportedMessage">JavaScript appears to be disabled. Please enable it to view this content.</p>
+		</div>
+	</noscript>
+	<script src="scripts/modernjscheck.js"></script>
+	<script src="scripts/supportcheck.js"></script>
+	<script src="scripts/offlineclient.js" type="module"></script>
+	<script src="scripts/main.js" type="module"></script>
+	<script src="scripts/register-sw.js" type="module"></script>
 
-    // Construct 啟動後呼叫
-    async function updateConstruct() {
-      console.log("🚀 [HTML] 收到 C3Ready 事件，準備更新文字");
-      const rt = globalThis.C3_GetRuntime?.() || globalThis.C3?.runtime;
-
-      if (!rt) {
-        console.warn("❌ [HTML] Construct runtime 仍不存在");
-        return;
-      }
-
-      if (!window.LIFF_USER) {
-        console.warn("⚠️ [HTML] 尚未取得 LIFF_USER，略過更新");
-        return;
-      }
-
-      rt.globalVars.NAME = window.LIFF_USER.name;
-      const txt = rt.objects.Text?.getFirstInstance?.();
-      if (txt) txt.text = `你好，${window.LIFF_USER.name}！`;
-      console.log("✨ [HTML] 成功更新 Construct 文字物件");
-    }
-
-    // Construct 初始化完成時會自動呼叫此事件
-    window.addEventListener("load", () => {
-      console.log("🚀 [HTML] 頁面載入，啟動 LIFF 初始化");
-      initLiff();
-    });
-
-    // Construct 的 runtime 載入完後手動派發事件
-    (function waitForC3() {
-      let retries = 0;
-      const timer = setInterval(() => {
-        const rt = globalThis.C3_GetRuntime?.() || globalThis.C3?.runtime;
-        if (rt) {
-          clearInterval(timer);
-          console.log("✅ [HTML] Construct runtime 準備完成");
-          window.dispatchEvent(new Event("C3Ready"));
-        } else if (++retries > 100) {
-          clearInterval(timer);
-          console.error("❌ [HTML] Construct runtime 初始化超時");
-        }
-      }, 100);
-    })();
-  </script>
-
-  <!-- ✅ Construct 3 核心 -->
-  <script src="scripts/modernjscheck.js"></script>
-  <script src="scripts/supportcheck.js"></script>
-  <script src="scripts/offlineclient.js" type="module"></script>
-  <script src="scripts/main.js" type="module"></script>
-  <script src="scripts/register-sw.js" type="module"></script>
-</body>
+</body> 
 </html>
