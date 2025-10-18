@@ -4,43 +4,31 @@ const scriptsInEvents = {
 
 	async 事件表1_Event2(runtime, localVars)
 	{
-(async () => {
-  const LIFF_ID = "2008129352-Ml3XP4xL"; // 你的 LIFF ID
-  const runtime = globalThis.C3?.runtime;
-  try {
-    await liff.init({ liffId: LIFF_ID });
+// 取得 Construct 3 runtime
+const runtime = globalThis.C3?.runtime;
 
-    if (!liff.isLoggedIn()) {
-      await liff.login({ redirectUri: location.href });
-      return;
-    }
+// 嘗試從 window.LIFF_USER 取得資料
+const user = window.LIFF_USER;
 
-    const profile = await liff.getProfile();
-    console.log("[C3] 取得 LINE 資料：", profile);
+// 如果有資料，就更新 C3 全域變數與 Text
+if (user && runtime) {
+    runtime.globalVars.NAME = user.name;
+    const txt = runtime.objects.Text.getFirstInstance();
+    if (txt) txt.text = `你好，${user.name}！`;
+    console.log("[C3] 已取得 LINE 名稱：", user.name);
+} else {
+    console.warn("[C3] 尚未載入 LIFF_USER，可能 HTML 還沒初始化。");
+}
 
-    // ✅ Construct 3 的 runtime 要這樣取得
-    
-    if (!runtime) {
-      alert("Construct 3 runtime 尚未載入");
-      return;
-    }
+	},
 
-    // ✅ 寫入全域變數
-    runtime.globalVars.ID = profile.userId;
-    runtime.globalVars.NAME = profile.displayName;
-
-    // ✅ 顯示測試
-    alert(`你好，${profile.displayName}！`);
-
-    // ✅ 同時更新畫面上的 Text 物件（如果名稱叫 Text）
-    const textObj = runtime.objects.Text.getFirstInstance();
-    if (textObj) textObj.text = `ID：${profile.userId}\nNAME：${profile.displayName}`;
-
-  } catch (err) {
-    console.error("[C3] 取得 LINE 資料失敗：", err);
-    alert("請從 LINE App 內開啟遊戲！");
-  }
-})();
+	async 事件表1_Event4(runtime, localVars)
+	{
+if (window.LIFF_USER) {
+  alert(`你好，${window.LIFF_USER.name}！`);
+} else {
+  alert("尚未取得 LIFF 資料。");
+}
 
 	}
 };
