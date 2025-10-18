@@ -1,107 +1,49 @@
 <!DOCTYPE html>
-<html lang="zh-Hant">
+<html>
 <head>
-  <meta charset="UTF-8">
-  <title>Water Walker</title>
-  <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
-  <meta name="generator" content="Scirra Construct">
-  <link rel="manifest" href="appmanifest.json">
-  <link rel="icon" type="image/png" href="icons/icon-512.png">
-  <link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8">
+	<title>666</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no">
+	
+	<!-- Made with Construct, the game and app creator :: https://www.construct.net -->
+	<meta name="generator" content="Scirra Construct">
 
-  <!-- ✅ 引入 LINE LIFF SDK -->
-  <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
-</head>
 
-<body style="font-family:sans-serif;text-align:center;background:#000;color:white;">
-  <h3>🔄 正在初始化 LIFF...</h3>
-  <p>請稍候...</p>
 
-  <script>
-  // ------------------------------
-  // 🚀 初始化 LIFF
-  // ------------------------------
-  const LIFF_ID = "2008129352-Ml3XP4xL"; // ← 改成你的 LIFF ID
+	<link rel="manifest" href="appmanifest.json">
+	<link rel="apple-touch-icon" sizes="128x128" href="icons/icon-128.png">
+	<link rel="apple-touch-icon" sizes="256x256" href="icons/icon-256.png">
+	<link rel="apple-touch-icon" sizes="512x512" href="icons/icon-512.png">
+	<link rel="icon" type="image/png" href="icons/icon-512.png">
 
-  async function initLiffAndStartC3() {
-    try {
-      console.log("🔹 開始初始化 LIFF...");
-      await liff.init({ liffId: LIFF_ID });
+	<link rel="stylesheet" href="style.css">
 
-      // 未登入則導向登入
-      if (!liff.isLoggedIn()) {
-        console.log("🟠 尚未登入，導向登入頁...");
-        liff.login({ redirectUri: location.href });
-        return;
-      }
 
-      // 取得使用者資料
-      const profile = await liff.getProfile();
-      console.log("✅ 成功取得 LINE Profile：", profile);
 
-      // 建立全域變數給 Construct 3 使用
-      window.LIFF_USER = {
-        id: profile.userId,
-        name: profile.displayName,
-        picture: profile.pictureUrl || "",
-        status: profile.statusMessage || ""
-      };
+</head> 
+ 
+<body>
 
-      console.log("✅ 已建立 window.LIFF_USER：", window.LIFF_USER);
+	
 
-      // 清除舊畫面並啟動 Construct 3
-      document.body.innerHTML = "";
-      startConstruct3();
+<script>
+if (location.protocol.substr(0, 4) === "file")
+{
+	alert("Web exports won't work until you upload them. (When running on the file: protocol, browsers block many features from working for security reasons.)");
+}
+</script>
+	
+	<noscript>
+		<div id="notSupportedWrap">
+			<h2 id="notSupportedTitle">This content requires JavaScript</h2>
+			<p class="notSupportedMessage">JavaScript appears to be disabled. Please enable it to view this content.</p>
+		</div>
+	</noscript>
+	<script src="scripts/modernjscheck.js"></script>
+	<script src="scripts/supportcheck.js"></script>
+	<script src="scripts/offlineclient.js" type="module"></script>
+	<script src="scripts/main.js" type="module"></script>
+	<script src="scripts/register-sw.js" type="module"></script>
 
-    } catch (err) {
-      console.error("❌ LIFF 初始化錯誤：", err);
-      document.body.innerHTML = `
-        <h2>⚠️ 初始化失敗</h2>
-        <p>${err.message}</p>
-      `;
-    }
-  }
-
-  // ------------------------------
-  // 🚀 啟動 Construct 3
-  // ------------------------------
-  function startConstruct3() {
-    console.log("🚀 Construct 3 啟動中...");
-
-    const scriptList = [
-      "scripts/modernjscheck.js",
-      "scripts/supportcheck.js",
-      "scripts/offlineclient.js",
-      "scripts/main.js"
-      // ❌ register-sw.js 不再使用，避免黑屏或快取舊版
-    ];
-
-    for (const src of scriptList) {
-      const s = document.createElement("script");
-      s.src = src;
-      s.type = "text/javascript";
-      document.body.appendChild(s);
-    }
-
-    console.log("✅ Construct 3 全部載入完成");
-  }
-
-  // ------------------------------
-  // 🚀 清理 Service Worker 快取（確保載入新版）
-  // ------------------------------
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.getRegistrations().then(regs => {
-      for (let reg of regs) reg.unregister();
-    });
-    if (window.caches) {
-      caches.keys().then(keys => keys.forEach(k => caches.delete(k)));
-    }
-  }
-
-  // ------------------------------
-  // 🚀 開始執行
-  // ------------------------------
-  initLiffAndStartC3();
-  </script>
-</body>
+</body> 
 </html>
