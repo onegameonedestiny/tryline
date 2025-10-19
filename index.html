@@ -8,18 +8,7 @@
     <meta name="generator" content="Scirra Construct">
 
     <link rel="manifest" href="appmanifest.json">
-    <link rel="apple-touch-icon" sizes="128x128" href="icons/icon-128.png">
-    <link rel="apple-touch-icon" sizes="256x256" href="icons/icon-256.png">
-    <link rel="apple-touch-icon" sizes="512x512" href="icons/icon-512.png">
-    <link rel="icon" type="image/png" href="icons/icon-512.png">
-
     <link rel="stylesheet" href="style.css">
-
-    <script 
-        src="https://static.line-scdn.net/liff/sdk/2.1.0/liff.js"
-        onload="startLiffProcess()" 
-        onerror="sendPayloadToC3('ERROR: LIFF SDK Download Failed')"
-    ></script>
 
     <script>
         // ***************************************************************
@@ -96,7 +85,7 @@
                 } else {
                     console.warn("LIFF STEP 3: 用戶未登入。開始執行 liff.login() 進行導向...");
                     
-                    // 導向登入頁面
+                    // 導向登入頁面，觸發 LINE 登入
                     liff.login({ 
                         redirectUri: window.location.href 
                     }); 
@@ -110,22 +99,19 @@
                 sendPayloadToC3("LIFF_FAIL: " + errorMessage);
             }
         }
-        
-        // 注意：這裡不再有立即呼叫 startLiffProcess() 的代碼，它現在由 <script onload="..."> 觸發。
-
     </script>
+    
+    <script 
+        src="https://static.line-scdn.net/liff/sdk/2.1.0/liff.js"
+        onload="startLiffProcess()" 
+        onerror="sendPayloadToC3('ERROR: LIFF SDK Download Failed')"
+    ></script>
+
 </head> 
  
 <body>
 
-<script>
-if (location.protocol.substr(0, 4) === "file")
-{
-    alert("Web exports won't work until you upload them. (When running on the file: protocol, browsers block many features from working for security reasons.)");
-}
-</script>
-    
-    <noscript>
+<noscript>
         <div id="notSupportedWrap">
             <h2 id="notSupportedTitle">This content requires JavaScript</h2>
             <p class="notSupportedMessage">JavaScript appears to be disabled. Please enable it to view this content.</p>
