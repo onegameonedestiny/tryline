@@ -45,11 +45,11 @@
             const checkInterval = setInterval(() => {
                 if (globalThis.c3runtime) {
                     clearInterval(checkInterval);
-                    console.log(`C3 Bridge: Runtime載入完成。立即呼叫 ${functionName} 傳送:`, payload);
+                    console.log(`C3 Bridge: Runtime載入完成。呼叫 ${functionName} 傳送:`, payload);
                     try {
                         globalThis.c3runtime.callFunction(functionName, payload);
                     } catch (e) {
-                        console.error("C3 Bridge ERROR: 呼叫 C3 函式失敗:", e);
+                        console.error("C3 Bridge ERROR: 呼叫 C3 函式失敗，C3可能未定義 ReceiveLineID 函式:", e);
                     }
                 }
             }, 100); // 每 100 毫秒檢查一次
@@ -60,9 +60,9 @@
          * 執行 LIFF 流程：初始化、登入、獲取 ID
          */
         async function startLiffProcess() {
-            // 【LIFF 檢查點 0】
+            // 【LIFF 檢查點 0】 確認 LIFF SDK 是否已載入
             if (typeof liff === 'undefined') {
-                console.error("LIFF ERROR 0: LIFF SDK (liff.js) 未載入。");
+                console.error("LIFF ERROR 0: LIFF SDK (liff.js) 未載入。請檢查 index.html 的 script 順序。");
                 sendPayloadToC3("ERROR: LIFF SDK Missing");
                 return;
             }
@@ -73,6 +73,7 @@
                 // 【LIFF 檢查點 1】 初始化 LIFF
                 await liff.init({ 
                     liffId: MY_LIFF_ID,
+                    // 啟用外部瀏覽器自動登入
                     withLoginOnExternalBrowser: true 
                 });
                 
@@ -87,7 +88,7 @@
                     
                     console.log("LIFF STEP 4: 成功取得 LINE User ID:", userId);
                     
-                    // 成功取得 ID，傳遞給 C3
+                    // 成功取得 ID，傳遞給 C3 (sendPayloadToC3 會自動等待 C3 啟動)
                     sendPayloadToC3(userId);
 
                 } else {
@@ -110,7 +111,7 @@
             }
         }
 
-        // ** 立即啟動 LIFF 流程 **
+        // ** 立即啟動 LIFF 流程 (在瀏覽器載入腳本時立即執行) **
         startLiffProcess();
 
     </script>
