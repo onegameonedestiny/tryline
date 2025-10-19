@@ -15,7 +15,11 @@
 
     <link rel="stylesheet" href="style.css">
 
-    <script src="https://static.line-scdn.net/liff/sdk/2.1.0/liff.js"></script>
+    <script 
+        src="https://static.line-scdn.net/liff/sdk/2.1.0/liff.js"
+        onload="startLiffProcess()" 
+        onerror="sendPayloadToC3('ERROR: LIFF SDK Download Failed')"
+    ></script>
 
     <script>
         // ***************************************************************
@@ -26,7 +30,6 @@
 
         /**
          * 核心函式：將 User ID 或錯誤訊息傳遞給 Construct 3 遊戲
-         * 使用輪詢 (Polling) 機制等待 C3 Runtime 啟動。
          * @param {string} payload - 要傳遞給 C3 函式的 User ID 或錯誤字串
          */
         function sendPayloadToC3(payload) {
@@ -58,22 +61,22 @@
 
         /**
          * 執行 LIFF 流程：初始化、登入、獲取 ID
+         * 這個函式會在 LIFF SDK (liff.js) 載入完成後，透過 onload 事件被執行。
          */
         async function startLiffProcess() {
-            // 【LIFF 檢查點 0】 確認 LIFF SDK 是否已載入
+            // 這個檢查點理論上不會再觸發，但保留作為最後防線
             if (typeof liff === 'undefined') {
-                console.error("LIFF ERROR 0: LIFF SDK (liff.js) 未載入。請檢查 index.html 的 script 順序。");
-                sendPayloadToC3("ERROR: LIFF SDK Missing");
+                console.error("LIFF ERROR 0: LIFF SDK 載入後仍未定義。請檢查網路或 CDN。");
+                sendPayloadToC3("ERROR: LIFF SDK Undefined");
                 return;
             }
             
-            console.log("LIFF STEP 1: LIFF SDK 檢查通過。開始初始化...");
+            console.log("LIFF STEP 1: LIFF SDK 檢查通過 (由 onload 觸發)。開始初始化...");
 
             try {
                 // 【LIFF 檢查點 1】 初始化 LIFF
                 await liff.init({ 
                     liffId: MY_LIFF_ID,
-                    // 啟用外部瀏覽器自動登入
                     withLoginOnExternalBrowser: true 
                 });
                 
@@ -88,17 +91,15 @@
                     
                     console.log("LIFF STEP 4: 成功取得 LINE User ID:", userId);
                     
-                    // 成功取得 ID，傳遞給 C3 (sendPayloadToC3 會自動等待 C3 啟動)
                     sendPayloadToC3(userId);
 
                 } else {
                     console.warn("LIFF STEP 3: 用戶未登入。開始執行 liff.login() 進行導向...");
                     
-                    // 如果未登入，立即導向登入頁面
+                    // 導向登入頁面
                     liff.login({ 
                         redirectUri: window.location.href 
                     }); 
-                    // 頁面將會跳轉，程序將會終止。
                 }
 
             } catch (err) {
@@ -106,13 +107,11 @@
                 const errorMessage = err.message || "Unknown LIFF Error";
                 console.error("LIFF FINAL STEP: LIFF 操作失敗:", err);
                 
-                // 傳遞錯誤訊息給 C3
                 sendPayloadToC3("LIFF_FAIL: " + errorMessage);
             }
         }
-
-        // ** 立即啟動 LIFF 流程 (在瀏覽器載入腳本時立即執行) **
-        startLiffProcess();
+        
+        // 注意：這裡不再有立即呼叫 startLiffProcess() 的代碼，它現在由 <script onload="..."> 觸發。
 
     </script>
 </head> 
