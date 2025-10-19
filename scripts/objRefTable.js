@@ -3,7 +3,8 @@ self.C3_GetObjectRefTable = function () {
 	return [
 		C3.Plugins.Text,
 		C3.Plugins.Button,
-		C3.Plugins.System.Acts.SetVar
+		C3.Plugins.System.Acts.SetVar,
+		C3.Plugins.Text.Acts.SetText
 	];
 };
 self.C3_JsPropNameTable = [

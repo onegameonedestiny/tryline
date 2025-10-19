@@ -1,50 +1,71 @@
 // liff_loader.js
 
-// ************************************************
-// !! 必須替換成您在 LINE Developers 後台取得的 LIFF ID !!
-// ************************************************
-const MY_LIFF_ID = "2008129352-Ml3XP4xL"; // 這是您輸入的 LIFF ID
-// ************************************************
+// ***************************************************************
+// !! 替換成您在 LINE Developers 後台取得的 LIFF ID !!
+// ***************************************************************
+const MY_LIFF_ID = "2008129352-Ml3XP4xL"; 
+// ***************************************************************
 
 /**
  * 初始化 LIFF 並嘗試取得 User ID
  * @param {runtime} runtime - Construct 3 的 Runtime 物件
  */
 async function initLiffAndGetUserId(runtime) {
+    // 檢查 LIFF SDK 是否已載入
+    if (typeof liff === 'undefined') {
+        console.error("LIFF STEP 0: 錯誤! LIFF SDK (liff.js) 未載入。請檢查 index.html。");
+        runtime.callFunction("ReceiveLineID", "ERROR: LIFF SDK Missing");
+        return;
+    }
+    
+    console.log("LIFF STEP 1: LIFF SDK 檢查通過。開始初始化...");
+
     try {
-        // 確保 LIFF SDK 已載入
-        if (typeof liff === 'undefined') {
-            console.error("LIFF SDK not loaded.");
-            // 使用 System 動作將錯誤狀態傳回 C3 事件表
-            runtime.callFunction("ReceiveLineID", "ERROR: LIFF SDK Missing");
-            return;
+        // 1. 初始化 LIFF
+        await liff.init({ 
+            liffId: MY_LIFF_ID,
+            // 由於您在外部瀏覽器中沒有自動跳轉，明確開啟這個選項可能有幫助
+            withLoginOnExternalBrowser: true 
+        });
+        
+        console.log("LIFF STEP 2: 初始化成功。檢查登入狀態...");
+
+        // 檢查是否已登入
+        if (liff.isLoggedIn()) {
+            console.log("LIFF STEP 3: 用戶已登入。嘗試取得 Profile...");
+            
+            // 取得用戶 Profile
+            const profile = await liff.getProfile();
+            const userId = profile.userId;
+            
+            console.log("LIFF STEP 4: 成功取得 LINE User ID:", userId);
+
+            // 呼叫 Construct 3 的 Function，傳遞 User ID
+            runtime.callFunction("ReceiveLineID", userId);
+
+        } else {
+            console.warn("LIFF STEP 3: 用戶未登入。開始執行 liff.login() 進行導向...");
+            
+            // 如果未登入，執行登入。LIFF 會導向登入頁面，成功後會重定向回來。
+            // 使用 window.location.href 確保返回當前 URL
+            liff.login({ 
+                redirectUri: window.location.href 
+            }); 
+            
+            // 這裡會跳轉，下面的程式碼不會立即執行。
         }
-
-        await liff.init({ liffId: MY_LIFF_ID });
-        console.log("LIFF initialized successfully.");
-
-        if (!liff.isLoggedIn()) {
-            console.log("User not logged in, initiating login...");
-            liff.login(); 
-            return;
-        }
-
-        const profile = await liff.getProfile();
-        const userId = profile.userId;
-        console.log("LINE User ID obtained:", userId);
-
-        // 呼叫 Construct 3 的 Function
-        runtime.callFunction("ReceiveLineID", userId);
 
     } catch (err) {
-        console.error("LIFF operation failed:", err);
+        console.error("LIFF FINAL STEP: LIFF 操作失敗:", err);
+        
+        // 將錯誤訊息也傳給 C3 遊戲，以便除錯
         runtime.callFunction("ReceiveLineID", "LIFF_FAIL: " + err.message);
     }
 }
 
 // 監聽 Construct 3 遊戲啟動事件，並開始執行 LIFF 邏輯
-// LIFF 應該在遊戲 Runtime 準備好時立即啟動
 globalThis.addEventListener("c3runtimeinit", () => {
     const runtime = globalThis.c3runtime;
+    console.log("C3 Runtime 初始化完成。開始執行 LIFF 流程。");
     initLiffAndGetUserId(runtime);
 });
