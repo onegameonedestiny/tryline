@@ -1,48 +1,87 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="UTF-8">
-    <title>666</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no">
-    
-    <meta name="generator" content="Scirra Construct">
+// liff_loader.js 或 新建檔案.js
 
-    <link rel="manifest" href="appmanifest.json">
-    <link rel="apple-touch-icon" sizes="128x128" href="icons/icon-128.png">
-    <link rel="apple-touch-icon" sizes="256x256" href="icons/icon-256.png">
-    <link rel="apple-touch-icon" sizes="512x512" href="icons/icon-512.png">
-    <link rel="icon" type="image/png" href="icons/icon-512.png">
+// ***************************************************************
+// !! 替換成您在 LINE Developers 後台取得的 LIFF ID !!
+// ***************************************************************
+const MY_LIFF_ID = "2008129352-Ml3XP4xL"; 
+// ***************************************************************
 
-    <link rel="stylesheet" href="style.css">
-
-    <script src="https://static.line-scdn.net/liff/sdk/2.1.0/liff.js"></script>
-
-    <script src="新建檔案.js"></script> 
-    
-</head> 
- 
-<body>
-
-<script>
-if (location.protocol.substr(0, 4) === "file")
-{
-    alert("Web exports won't work until you upload them. (When running on the file: protocol, browsers block many features from working for security reasons.)");
+/**
+ * 等待 Construct 3 Runtime 啟動完成
+ * @returns {Promise<runtime>} 解決後返回 C3 Runtime 物件
+ */
+function waitForC3Runtime() {
+    return new Promise(resolve => {
+        const checkInterval = setInterval(() => {
+            if (globalThis.c3runtime) {
+                clearInterval(checkInterval);
+                console.log("C3 Runtime 檢查通過。開始傳輸 User ID。");
+                resolve(globalThis.c3runtime);
+            } else {
+                // 可選：每秒檢查一次，確保 C3 在啟動
+                // console.log("Waiting for C3 Runtime..."); 
+            }
+        }, 100); // 每 100 毫秒檢查一次
+    });
 }
-</script>
-    
-    <noscript>
-        <div id="notSupportedWrap">
-            <h2 id="notSupportedTitle">This content requires JavaScript</h2>
-            <p class="notSupportedMessage">JavaScript appears to be disabled. Please enable it to view this content.</p>
-        </div>
-    </noscript>
-    
-    <script src="scripts/modernjscheck.js"></script>
-    <script src="scripts/supportcheck.js"></script>
-    <script src="scripts/offlineclient.js" type="module"></script>
-    <script src="scripts/main.js" type="module"></script>
-    <script src="scripts/register-sw.js" type="module"></script>
 
-</body> 
 
-</html>
+/**
+ * 執行 LIFF 流程：初始化、登入、獲取 ID
+ */
+async function startLiffProcess() {
+    // 檢查 LIFF SDK 是否已載入
+    if (typeof liff === 'undefined') {
+        console.error("LIFF ERROR: LIFF SDK (liff.js) 未載入。");
+        
+        // 即使 C3 沒啟動，也要先準備錯誤訊息
+        waitForC3Runtime().then(runtime => {
+            runtime.callFunction("ReceiveLineID", "ERROR: LIFF SDK Missing");
+        });
+        return;
+    }
+    
+    console.log("LIFF STEP 1: LIFF SDK 檢查通過。開始初始化...");
+
+    try {
+        await liff.init({ 
+            liffId: MY_LIFF_ID,
+            withLoginOnExternalBrowser: true 
+        });
+        
+        console.log("LIFF STEP 2: 初始化成功。檢查登入狀態...");
+
+        if (liff.isLoggedIn()) {
+            console.log("LIFF STEP 3: 用戶已登入。嘗試取得 Profile...");
+            
+            const profile = await liff.getProfile();
+            const userId = profile.userId;
+            
+            console.log("LIFF STEP 4: 成功取得 LINE User ID:", userId);
+            
+            // ** 關鍵步驟：等待 C3 Runtime 啟動後，傳遞 ID **
+            const runtime = await waitForC3Runtime();
+            runtime.callFunction("ReceiveLineID", userId);
+
+        } else {
+            console.warn("LIFF STEP 3: 用戶未登入。開始執行 liff.login() 進行導向...");
+            
+            // 如果未登入，立即導向登入頁面
+            liff.login({ 
+                redirectUri: window.location.href 
+            }); 
+            // 這裡會跳轉，程序結束。重定向回來後，腳本會再次執行。
+        }
+
+    } catch (err) {
+        console.error("LIFF FINAL STEP: LIFF 操作失敗:", err);
+        
+        // 傳遞錯誤訊息
+        waitForC3Runtime().then(runtime => {
+            runtime.callFunction("ReceiveLineID", "LIFF_FAIL: " + err.message);
+        });
+    }
+}
+
+// ** 立即啟動 LIFF 流程 **
+startLiffProcess();
