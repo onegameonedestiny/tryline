@@ -1267,18 +1267,7 @@ function or(l, r)
 }
 
 self.C3_ExpressionFuncs = [
-		() => 10,
-		() => 0,
-		p => {
-			const f0 = p._GetNode(0).GetBoundMethod();
-			const f1 = p._GetNode(1).GetBoundMethod();
-			return () => and(((and("經度", f0()) + "\n") + "緯度"), f1());
-		},
-		p => {
-			const f0 = p._GetNode(0).GetBoundMethod();
-			const f1 = p._GetNode(1).GetBoundMethod();
-			return () => and(and(f0(), ","), f1());
-		},
+		() => "獲取完畢",
 		() => "line_name",
 		p => {
 			const f0 = p._GetNode(0).GetBoundMethod();

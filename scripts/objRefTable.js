@@ -6,16 +6,15 @@ self.C3_GetObjectRefTable = function () {
 		C3.Plugins.Text,
 		C3.Plugins.Clipboard,
 		C3.Plugins.LocalStorage,
-		C3.Plugins.Button.Cnds.OnClicked,
-		C3.Plugins.Geolocation.Acts.RequestLocation,
-		C3.Plugins.Geolocation.Cnds.OnUpdate,
+		C3.Plugins.System.Cnds.OnLayoutStart,
+		C3.Plugins.LocalStorage.Acts.GetAllKeyNames,
+		C3.Plugins.LocalStorage.Cnds.OnAllGetsComplete,
 		C3.Plugins.Text.Acts.SetText,
-		C3.Plugins.Geolocation.Exps.Longitude,
-		C3.Plugins.Geolocation.Exps.Latitude,
-		C3.Plugins.Clipboard.Acts.CopyText,
+		C3.Plugins.Button.Cnds.OnClicked,
 		C3.Plugins.LocalStorage.Acts.GetItem,
 		C3.Plugins.LocalStorage.Cnds.OnItemGet,
-		C3.Plugins.LocalStorage.Exps.ItemValue
+		C3.Plugins.LocalStorage.Exps.ItemValue,
+		C3.JavaScriptInEvents.事件表1_Event6
 	];
 };
 self.C3_JsPropNameTable = [
