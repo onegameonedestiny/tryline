@@ -1267,8 +1267,10 @@ function or(l, r)
 }
 
 self.C3_ExpressionFuncs = [
-		() => "獲取完畢",
-		() => "line_name",
+		p => {
+			const v0 = p._GetNode(0).GetVar();
+			return () => v0.GetValue();
+		},
 		p => {
 			const f0 = p._GetNode(0).GetBoundMethod();
 			return () => f0();

@@ -2,11 +2,11 @@
 
 const scriptsInEvents = {
 
-	async 事件表1_Event6(runtime, localVars)
+	async 事件表1_Event2(runtime, localVars)
 	{
 		const n = localStorage.getItem("line_name");
 		alert("line_name = " + n);
-		
+		runtime.globalVars.NAME = n;
 	}
 };
 
