@@ -2,128 +2,48 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>666</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no">
-    
-    <meta name="generator" content="Scirra Construct">
-
-    <link rel="manifest" href="appmanifest.json">
-    <link rel="stylesheet" href="style.css">
-
-    <script>
-        // ***************************************************************
-        // !! 替換成您在 LINE Developers 後台取得的 LIFF ID !!
-        // ***************************************************************
-        const MY_LIFF_ID = "2008129352-Ml3XP4xL"; 
-        // ***************************************************************
-
-        /**
-         * 核心函式：將 User ID 或錯誤訊息傳遞給 Construct 3 遊戲
-         * @param {string} payload - 要傳遞給 C3 函式的 User ID 或錯誤字串
-         */
-        function sendPayloadToC3(payload) {
-            const functionName = "ReceiveLineID";
-            
-            // 檢查 C3 Runtime 是否已存在
-            if (globalThis.c3runtime) {
-                console.log(`C3 Bridge: Runtime已存在，立即呼叫 ${functionName} 傳送:`, payload);
-                globalThis.c3runtime.callFunction(functionName, payload);
-                return;
-            }
-
-            // 如果 C3 Runtime 還未載入，則設置間隔檢查 (Polling)
-            console.log(`C3 Bridge: Runtime尚未載入。設置輪詢，等待傳送:`, payload);
-            
-            const checkInterval = setInterval(() => {
-                if (globalThis.c3runtime) {
-                    clearInterval(checkInterval);
-                    console.log(`C3 Bridge: Runtime載入完成。呼叫 ${functionName} 傳送:`, payload);
-                    try {
-                        globalThis.c3runtime.callFunction(functionName, payload);
-                    } catch (e) {
-                        console.error("C3 Bridge ERROR: 呼叫 C3 函式失敗，C3可能未定義 ReceiveLineID 函式:", e);
-                    }
-                }
-            }, 100); // 每 100 毫秒檢查一次
-        }
+	<title>666</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no">
+	
+	<!-- Made with Construct, the game and app creator :: https://www.construct.net -->
+	<meta name="generator" content="Scirra Construct">
 
 
-        /**
-         * 執行 LIFF 流程：初始化、登入、獲取 ID
-         * 這個函式會在 LIFF SDK (liff.js) 載入完成後，透過 onload 事件被執行。
-         */
-        async function startLiffProcess() {
-            // 這個檢查點理論上不會再觸發，但保留作為最後防線
-            if (typeof liff === 'undefined') {
-                console.error("LIFF ERROR 0: LIFF SDK 載入後仍未定義。請檢查網路或 CDN。");
-                sendPayloadToC3("ERROR: LIFF SDK Undefined");
-                return;
-            }
-            
-            console.log("LIFF STEP 1: LIFF SDK 檢查通過 (由 onload 觸發)。開始初始化...");
 
-            try {
-                // 【LIFF 檢查點 1】 初始化 LIFF
-                await liff.init({ 
-                    liffId: MY_LIFF_ID,
-                    withLoginOnExternalBrowser: true 
-                });
-                
-                console.log("LIFF STEP 2: 初始化成功。檢查登入狀態...");
+	<link rel="manifest" href="appmanifest.json">
+	<link rel="apple-touch-icon" sizes="128x128" href="icons/icon-128.png">
+	<link rel="apple-touch-icon" sizes="256x256" href="icons/icon-256.png">
+	<link rel="apple-touch-icon" sizes="512x512" href="icons/icon-512.png">
+	<link rel="icon" type="image/png" href="icons/icon-512.png">
 
-                // 【LIFF 檢查點 2】 檢查登入狀態
-                if (liff.isLoggedIn()) {
-                    console.log("LIFF STEP 3: 用戶已登入。嘗試取得 Profile...");
-                    
-                    const profile = await liff.getProfile();
-                    const userId = profile.userId;
-                    
-                    console.log("LIFF STEP 4: 成功取得 LINE User ID:", userId);
-                    
-                    sendPayloadToC3(userId);
+	<link rel="stylesheet" href="style.css">
 
-                } else {
-                    console.warn("LIFF STEP 3: 用戶未登入。開始執行 liff.login() 進行導向...");
-                    
-                    // 導向登入頁面，觸發 LINE 登入
-                    liff.login({ 
-                        redirectUri: window.location.href 
-                    }); 
-                }
 
-            } catch (err) {
-                // 【LIFF 檢查點 3】 LIFF 初始化或操作發生錯誤
-                const errorMessage = err.message || "Unknown LIFF Error";
-                console.error("LIFF FINAL STEP: LIFF 操作失敗:", err);
-                
-                sendPayloadToC3("LIFF_FAIL: " + errorMessage);
-            }
-        }
-    </script>
-    
-    <script 
-        src="https://static.line-scdn.net/liff/sdk/2.1.0/liff.js"
-        onload="startLiffProcess()" 
-        onerror="sendPayloadToC3('ERROR: LIFF SDK Download Failed')"
-    ></script>
 
 </head> 
  
 <body>
 
-<noscript>
-        <div id="notSupportedWrap">
-            <h2 id="notSupportedTitle">This content requires JavaScript</h2>
-            <p class="notSupportedMessage">JavaScript appears to be disabled. Please enable it to view this content.</p>
-        </div>
-    </noscript>
-    
-    <script src="scripts/modernjscheck.js"></script>
-    <script src="scripts/supportcheck.js"></script>
-    <script src="scripts/offlineclient.js" type="module"></script>
-    <script src="scripts/main.js" type="module"></script>
-    <script src="scripts/register-sw.js" type="module"></script>
+	
+
+<script>
+if (location.protocol.substr(0, 4) === "file")
+{
+	alert("Web exports won't work until you upload them. (When running on the file: protocol, browsers block many features from working for security reasons.)");
+}
+</script>
+	
+	<noscript>
+		<div id="notSupportedWrap">
+			<h2 id="notSupportedTitle">This content requires JavaScript</h2>
+			<p class="notSupportedMessage">JavaScript appears to be disabled. Please enable it to view this content.</p>
+		</div>
+	</noscript>
+	<script src="scripts/modernjscheck.js"></script>
+	<script src="scripts/supportcheck.js"></script>
+	<script src="scripts/offlineclient.js" type="module"></script>
+	<script src="scripts/main.js" type="module"></script>
+	<script src="scripts/register-sw.js" type="module"></script>
 
 </body> 
-
 </html>
